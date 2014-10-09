@@ -7,6 +7,9 @@ GET     /                           controllers.Application.index()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
+<<<<<<< HEAD
 GET 	/blank.html				        controllers.Assets.at(path="/public", file="blank.html")
 GET 	/login.html				        controllers.Assets.at(path="/public", file="login.html")
 GET 	/index.html				        controllers.Assets.at(path="/public", file="index.html")
+=======
+>>>>>>> 565084110e3ade1909c471a66463d552f9b82294
