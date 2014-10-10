@@ -27,11 +27,15 @@ public class Person extends Model {
 	@Required(message = "validation.required.emphasis")
 	private String lname;
 
+
+	@Required
+	private int score;
 	
 	@DateTime(pattern = "mm/dd/yyyy")
 	private String dob;
 	
-	
+
+	private String ph_no;
 	private Character gender;
 
 	@Required(message = "validation.required.emphasis")
@@ -89,6 +93,7 @@ public class Person extends Model {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+	
 
 	public String getPh_no() {
 		return ph_no;
@@ -106,10 +111,8 @@ public class Person extends Model {
 		this.score = score;
 	}
 
-	private String ph_no;
+	
 
-	@Required
-	private int score;
 
 
 
