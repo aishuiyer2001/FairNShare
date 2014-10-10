@@ -1,5 +1,9 @@
 package controllers;
 
+import java.util.List;
+
+import com.sun.java.swing.plaf.windows.WindowsBorders.DashedBorder;
+
 import models.Person;
 import play.*;
 import play.data.Form;
@@ -26,13 +30,26 @@ public class Application extends Controller {
     }
     
     
+    
+    public static Result showFriends() {
+    	
+    	List<Person> persons = new Model.Finder(String.class,Person.class).all();
+    	return ok(toJson(persons));
+    	// return ok();
+    	
+    	
+    }
+    
+    
     public static Result checkPerson() {
     	Login loginInfo=Form.form(Login.class).bindFromRequest().get();
      	Person existingPerson = (Person) new Model.Finder(String.class,Person.class).byId(loginInfo.getEmail());
     	 if(existingPerson!=null && existingPerson.getPassword().equals(loginInfo.getPassword()))
     	{
     		//return badRequest(views.html.index.render(filledPersonForm));
-    		 return ok(toJson(existingPerson));
+    	//	 return ok(toJson(existingPerson));
+    		 
+    		 return ok(views.html.dashboard.render(""));
     	}
     	else
     	{
