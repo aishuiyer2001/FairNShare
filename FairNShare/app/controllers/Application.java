@@ -46,12 +46,13 @@ public class Application extends Controller {
 	public static Result createTask() {
 
 		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
+		
 		Person assignedToEmailFound = (Person)new Model.Finder(String.class,Person.class).byId(newTask.getEmailAssignedTo());
 
 		if(assignedToEmailFound!=null && assignedToEmailFound.getEmail().equals(newTask.getEmailAssignedTo()))
 		{
 			newTask.save();
-			return ok(toJson(newTask));
+			//return ok(toJson(newTask));
 		}			
 
 
