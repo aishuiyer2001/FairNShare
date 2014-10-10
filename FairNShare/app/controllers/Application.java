@@ -38,7 +38,8 @@ public class Application extends Controller {
 
 		Person person=Form.form(Person.class).bindFromRequest().get();
 		person.save();
-		return redirect(routes.Application.index());
+		//return redirect(routes.Application.index());
+		return ok(index.render("User Registered"));
 
 
 	}

@@ -138,7 +138,7 @@ h1 {
 
 .sidebar .nav-second-level li,
 .sidebar .nav-third-level li {
-    border-bottom: 0!important;
+    border-bottom: 0 !important;
 }
 
 .sidebar .nav-second-level li a {
