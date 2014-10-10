@@ -2,14 +2,17 @@ package models;
 
 import java.util.Date;
 
+import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+
 import play.data.format.Formats.DateTime;
 import play.data.validation.Constraints.Email;
 import play.data.validation.Constraints.Required;
-
-public class TaskInfo {
+import play.db.ebean.Model;
+@Entity
+public class TaskInfo extends Model{
 
 	@Id
 	private long taskID;
@@ -18,6 +21,8 @@ public class TaskInfo {
 	private String title;
 	
 	private String description;
+	
+	private String createdBy;
 	
 	@ManyToOne
 	@Email
@@ -29,10 +34,11 @@ public class TaskInfo {
 	private boolean done;
 	
 	
-public TaskInfo() {
+	public TaskInfo()
+	{
 	this.done=false;
 	this.points=0;
-}
+	}
 	
 	public long getTaskID() {
 		return taskID;
@@ -74,19 +80,19 @@ public TaskInfo() {
 		this.done = status;
 	}
 
-	public Date getStartDate() {
+	public String getStartDate() {
 		return startDate;
 	}
 
-	public void setStartDate(Date startDate) {
+	public void setStartDate(String startDate) {
 		this.startDate = startDate;
 	}
 
-	public Date getEndDate() {
+	public String getEndDate() {
 		return endDate;
 	}
 
-	public void setEndDate(Date endDate) {
+	public void setEndDate(String endDate) {
 		this.endDate = endDate;
 	}
 
@@ -98,13 +104,21 @@ public TaskInfo() {
 		this.points = points;
 	}
 
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+
 	@Required(message = "validation.required.emphasis")
-	@DateTime(pattern = "mm/dd/yyyy hh:mm")
-	private Date startDate;
+	//@DateTime(pattern = "mm/dd/yyyy hh:mm")
+	private String startDate;
 	
 	@Required(message = "validation.required.emphasis")
-	@DateTime(pattern = "mm/dd/yyyy hh:mm")
-	private Date endDate;
+	//@DateTime(pattern = "mm/dd/yyyy hh:mm")
+	private String endDate;
 	
 	@Required
 	private int points;

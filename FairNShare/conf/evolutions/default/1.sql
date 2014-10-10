@@ -15,7 +15,22 @@ create table person (
   constraint pk_person primary key (email))
 ;
 
+create table task_info (
+  task_id                   bigint not null,
+  title                     varchar(255),
+  description               varchar(255),
+  created_by                varchar(255),
+  email_assigned_to         varchar(255),
+  done                      boolean,
+  start_date                varchar(255),
+  end_date                  varchar(255),
+  points                    integer,
+  constraint pk_task_info primary key (task_id))
+;
+
 create sequence person_seq;
+
+create sequence task_info_seq;
 
 
 
@@ -26,7 +41,11 @@ SET REFERENTIAL_INTEGRITY FALSE;
 
 drop table if exists person;
 
+drop table if exists task_info;
+
 SET REFERENTIAL_INTEGRITY TRUE;
 
 drop sequence if exists person_seq;
+
+drop sequence if exists task_info_seq;
 

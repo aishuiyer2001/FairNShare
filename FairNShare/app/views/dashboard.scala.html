@@ -9,11 +9,55 @@
 @import helper._
 
 @main("Dashboard") {
-<script type='text/javascript' src='@routes.Assets.at("myFriends.js")'></script>
+<script type='text/javascript' src='@routes.Assets.at("dashboard.js")'></script>
 <ul id="friends"></ul>
-<form role="form" action="@routes.Application.showFriends()" method="POST">
 
-<button type="submit" class="btn btn-success">Show Friends</button>
+
+
+<button id ="showFriends" class="btn btn-success">Show Friends</button>
+
+
+<ul id="tasks"></ul>
+
+
+<button id ="showTasks"  class="btn btn-success">Show Tasks</button>
+
+
+
+
+<form role="form" action="@routes.Application.createTask()" method="POST">
+ <div class="row">
+                       
+                               <div class="col-xs-12 col-sm-6 col-md-6">
+                                       <div class="form-group">
+                       <input type="text" name="title" id="title" class="form-control input-lg"  placeholder="Title" tabindex="1" required>
+                                       </div>
+                               </div>
+                               <div class="col-xs-12 col-sm-6 col-md-6">
+                                       <div class="form-group">
+                                               <input type="text" name="description" id="description" class="form-control input-lg"  placeholder="Description" tabindex="2" required>
+                                       </div>
+                               </div>
+                       </div>
+                       <div class="form-group">
+                               <input type="text" name="emailAssignedTo" id="emailAssignedTo" class="form-control input-lg"   placeholder="emailAssignedTo" tabindex="3">
+                       </div>
+                       <div class="form-group">
+                               <input type="text" name="points" id="points" class="form-control input-lg"  placeholder="points" tabindex="4" required>
+                       </div>
+                       <div class="row">
+                               <div class="col-xs-12 col-sm-6 col-md-6">
+                                       <div class="form-group">
+                                               <input type="text" name="startDate" id="startDate" class="form-control input-lg"  placeholder="start date" tabindex="5" required>
+                                       </div>
+                               </div>
+                               <div class="col-xs-12 col-sm-6 col-md-6">
+                                       <div class="form-group">
+                                               <input type="text" name="endDate" id="endDate" class="form-control input-lg" placeholder="end date" tabindex="6" required>
+                                       </div>
+                               </div>
+                       </div>
+<button type="submit" class="btn btn-success">Create Task</button>
 </form>
 
 
