@@ -1,5 +1,3 @@
-
-
 @(message: String)
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
@@ -11,11 +9,12 @@
 @main("FairNShare") {
 <div class="container">
 	   <div class="col-sm-6">
-	       <h1><a href="#">Fair n' Share</a>
-	          <p class="lead">{Schedule it.. Things go better!}</p></h1>
-	      </div>
+	       <h1><a href="#">Fair n' Share</a></h1>
+	       <p class="lead">{Schedule it.. Things go better!}</p>
+	   </div>
+	  
 
-   <div class="navbar-collapse collapse">
+   		<div class="navbar-collapse collapse">
           <form class="navbar-form navbar-right" role="form" action="@routes.Application.checkPerson()" method="POST">
             <div class="form-group">
               <input type="email" placeholder="Email" name ="email" id="email" class="form-control" required>

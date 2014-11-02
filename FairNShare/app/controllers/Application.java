@@ -26,7 +26,7 @@ public class Application extends Controller {
 
 	public static Result index() {
 
-		return ok(index.render("Testing"));
+		return ok(index.render("Testing")); //----------------Do we need a tesing message here??-----------------
 	}
 
 
@@ -65,10 +65,10 @@ public class Application extends Controller {
 	public static Result showTasks() {
 		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();
 
-		String user = session("connected");
+		String user = session("connected"); //----------------Why the session variable is used? It doesn't have any use!-------------
 		if(user != null) ;
-		// return ok("Hello " + user);
-		return ok(toJson(tasks));
+		 return ok("Hello " + user);
+		//return ok(toJson(tasks));
 		// return ok();
 
 	}
@@ -76,7 +76,7 @@ public class Application extends Controller {
 	public static Result showFriends() {
 		List<Person> persons = new Model.Finder(String.class,Person.class).all();
 
-		String user = session("connected");
+		String user = session("connected"); //----------------Why the session variable is used? It doesn't have any use here!-------------
 		if(user != null) ;
 		// return ok("Hello " + user);
 		return ok(toJson(persons));
@@ -89,18 +89,29 @@ public class Application extends Controller {
 		Login loginInfo=Form.form(Login.class).bindFromRequest().get();
 		Person existingPerson = (Person) new Model.Finder(String.class,Person.class).byId(loginInfo.getEmail());
 		if(existingPerson!=null && existingPerson.getPassword().equals(loginInfo.getPassword()))
-		{
-			//return badRequest(views.html.index.render(filledPersonForm));
-			//	 return ok(toJson(existingPerson));
-
-			return ok(views.html.dashboard.render(""));
+		{	
+			String username=existingPerson.getFname(); 			//Get the First name by using the primary key email
+			String usermail=existingPerson.getEmail(); 			//Get the email id of the user & set in the session variable to use for other activities
+			session("connected", username);						//Assign it to the session variable
+			String user = session("connected");
+			if(user != null) ;	
+			
+			//return ok("Welcome " + user + usermail);			//Display the username - testing
+			return ok(views.html.dashboard.render("Welcome " + user));
 		}
 
 		return redirect(routes.Application.index());
 
 
 	}
+	
+	public static Result endSession() {
+		session().clear();										//Ends user session and redirects to index page
+		String user = session("connected");
+		return redirect(routes.Application.index());	
+	}
 
+	
 	public static class Login {
 
 		private String email;

@@ -1,5 +1,5 @@
 $ ->
-   $('#dashboard_div').append $('<h2>').text "Welcome to dashboard, (Under construction)"  
+    
    $(document).on('click', '#friend-page', ( ->
       $.get "/showFriends",(friends) ->
          $('#friend_div').show()
