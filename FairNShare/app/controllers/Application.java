@@ -26,12 +26,8 @@ public class Application extends Controller {
 
 	public static Result index() {
 
-		return ok(index.render("Testing")); //----------------Do we need a tesing message here??-----------------
+		return ok(index.render(""));
 	}
-
-
-
-
 
 
 	public static Result addPerson() {
@@ -40,10 +36,9 @@ public class Application extends Controller {
 		person.save();
 		//return redirect(routes.Application.index());
 		return ok(index.render("User Registered"));
-
-
 	}
 
+	
 	public static Result createTask() {
 
 		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
@@ -64,24 +59,13 @@ public class Application extends Controller {
 
 	public static Result showTasks() {
 		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();
-
-		String user = session("connected"); //----------------Why the session variable is used? It doesn't have any use!-------------
-		if(user != null) ;
-		 return ok("Hello " + user);
-		//return ok(toJson(tasks));
-		// return ok();
-
+		return ok();
+		
 	}
 	
 	public static Result showFriends() {
 		List<Person> persons = new Model.Finder(String.class,Person.class).all();
-
-		String user = session("connected"); //----------------Why the session variable is used? It doesn't have any use here!-------------
-		if(user != null) ;
-		// return ok("Hello " + user);
 		return ok(toJson(persons));
-		// return ok();
-
 	}
 
 
@@ -93,6 +77,7 @@ public class Application extends Controller {
 			String username=existingPerson.getFname(); 			//Get the First name by using the primary key email
 			String usermail=existingPerson.getEmail(); 			//Get the email id of the user & set in the session variable to use for other activities
 			session("connected", username);						//Assign it to the session variable
+			session("connectedmail", username);	
 			String user = session("connected");
 			if(user != null) ;	
 			
