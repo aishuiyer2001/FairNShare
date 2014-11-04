@@ -2,20 +2,14 @@ package controllers;
 
 import java.util.List;
 
-
-
-
-
-
-import ch.qos.logback.core.joran.action.ActionUtil.Scope;
-
-import com.sun.java.swing.plaf.windows.WindowsBorders.DashedBorder;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import models.Person;
 import models.TaskInfo;
 import play.*;
 import play.data.Form;
 import play.db.ebean.Model;
+import play.libs.Json;
 import play.mvc.*;
 import play.mvc.Http.Context;
 import play.mvc.Http.Session;
@@ -38,11 +32,11 @@ public class Application extends Controller {
 		return ok(index.render("User Registered"));
 	}
 
-	
+
 	public static Result createTask() {
 
 		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
-		
+
 		Person assignedToEmailFound = (Person)new Model.Finder(String.class,Person.class).byId(newTask.getEmailAssignedTo());
 
 		if(assignedToEmailFound!=null && assignedToEmailFound.getEmail().equals(newTask.getEmailAssignedTo()))
@@ -51,24 +45,44 @@ public class Application extends Controller {
 			//return ok(toJson(newTask));
 		}			
 
-
 		return ok(views.html.dashboard.render(""));
 
 	}
 
 
-	public static Result getPointsToComplete() {
-		int pointsToComplete=20;
-		return ok(toJson(pointsToComplete));
+
+	public static Result getPointsToComplete()  {
+		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));
+		double earnedPoints = currentUser.getScore();
+		double pointsToComplete=0;
+
+		List<Person> otherUsers= new Model.Finder(String.class,Person.class).all(); 
+
+		otherUsers.remove(currentUser);
+
+		double scoreOfOtherUsers=0;
+		for(Person user : otherUsers)
+			scoreOfOtherUsers += user.getScore();
+		if(otherUsers.size()>0)
+			pointsToComplete=scoreOfOtherUsers/otherUsers.size()-earnedPoints;
+
+		if(pointsToComplete<0)
+			pointsToComplete=0;
+
+		ObjectNode userPoints=Json.newObject();
+		userPoints.put("PointsToComplete", pointsToComplete);
+		userPoints.put("EarnedPoints", earnedPoints);
+		return ok(userPoints);
+
 	}
 
-	
+
 	public static Result showTasks() {
 		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();
 		return ok();
-		
+
 	}
-	
+
 	public static Result showFriends() {
 		List<Person> persons = new Model.Finder(String.class,Person.class).all();
 		return ok(toJson(persons));
@@ -83,10 +97,10 @@ public class Application extends Controller {
 			String username=existingPerson.getFname(); 			//Get the First name by using the primary key email
 			String usermail=existingPerson.getEmail(); 			//Get the email id of the user & set in the session variable to use for other activities
 			session("connected", username);						//Assign it to the session variable
-			session("connectedmail", username);	
+			session("connectedmail", usermail);	
 			String user = session("connected");
 			if(user != null) ;	
-			
+
 			//return ok("Welcome " + user + usermail);			//Display the username - testing
 			return ok(views.html.dashboard.render("Welcome " + user));
 		}
@@ -95,15 +109,15 @@ public class Application extends Controller {
 
 
 	}
-	
-	 public static Result endSession() 
-	 {                      
+
+	public static Result endSession() 
+	{                      
 		session().clear();										//Ends user session and redirects to index page
 		String user = session("connected");
 		return redirect(routes.Application.index());	
-	 } 
+	} 
 
-	
+
 	public static class Login {
 
 		private String email;
