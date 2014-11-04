@@ -6,10 +6,11 @@
 GET     /                           controllers.Application.index()
 POST	/person						controllers.Application.addPerson()
 POST    /dashboard					controllers.Application.checkPerson()
+GET		/getPoints					controllers.Application.getPointsToComplete()
 GET    /showFriends			        controllers.Application.showFriends()
 POST    /createTask			        controllers.Application.createTask()
 GET    /showTasks			        controllers.Application.showTasks()
-GET    /dashboard						controllers.Application.endSession()
+GET    /dashboard					controllers.Application.endSession()
 #GET    /*name						controllers.Application.endSession(name)
 
 

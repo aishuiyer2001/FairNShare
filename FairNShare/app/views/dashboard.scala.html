@@ -9,7 +9,8 @@
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
 <script
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-
+<script type='text/javascript' src='@routes.Assets.at("dashboard.js")'></script>
+<script type='text/javascript' src='@routes.Assets.at("new.js")'></script>
 
 @import helper._ 
 @main("Dashboard") {
@@ -63,13 +64,20 @@
 
 	<!-- Page Content -->
 
-
-
 </div>
 <div class="pos" style="padding-left: 150px; right: 350px;"
 	id="dashboard_div">
 	<h2>@message</h2>
 </div>
+
+
+<div class="pos userPoints" style="padding-left: 150px; right: 350px; padding-top:70px;">
+		<h5>
+			Points Earned : <span id="earned"  style="padding-right:150px;"></span> 
+			Points To Complete : <span id="toComplete"> </span>
+		</h5>
+</div>
+
 <div class="pos" style="padding-left: 150px; right: 350px;"
 	id="friend_div">
 	<ul id="friends"></ul>
@@ -85,7 +93,6 @@
 </div>
 
 
-<script type='text/javascript' src='@routes.Assets.at("dashboard.js")'></script>
 <ul id="friends"></ul>
 <button id="showFriends" class="btn btn-success">Show Friends</button>
 <ul id="tasks"></ul>

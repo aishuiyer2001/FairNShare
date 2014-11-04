@@ -57,6 +57,12 @@ public class Application extends Controller {
 	}
 
 
+	public static Result getPointsToComplete() {
+		int pointsToComplete=20;
+		return ok(toJson(pointsToComplete));
+	}
+
+	
 	public static Result showTasks() {
 		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();
 		return ok();
@@ -90,11 +96,12 @@ public class Application extends Controller {
 
 	}
 	
-	public static Result endSession() {
+	 public static Result endSession() 
+	 {                      
 		session().clear();										//Ends user session and redirects to index page
 		String user = session("connected");
 		return redirect(routes.Application.index());	
-	}
+	 } 
 
 	
 	public static class Login {
