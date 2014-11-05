@@ -17,7 +17,6 @@ $(function() {
         } else {
             $('div.navbar-collapse').removeClass('collapse')
         }
-
         height = (this.window.innerHeight > 0) ? this.window.innerHeight : this.screen.height;
         height = height - topOffset;
         if (height < 1) height = 1;
@@ -26,3 +25,8 @@ $(function() {
         }
     })
 })
+$("p").hover(function(){
+  $("p").css("background-color","yellow");
+  },function(){
+  $("p").css("background-color","pink");
+});

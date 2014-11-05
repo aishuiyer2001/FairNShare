@@ -1,18 +1,51 @@
 package controllers;
 
+import java.awt.Window;
+import java.awt.event.WindowEvent;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
-import java.util.Timer;
 import java.util.Date;
-import java.util.TimerTask;
+import java.util.List;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import org.h2.engine.User;
+
+import ch.qos.logback.core.joran.action.ActionUtil.Scope;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sun.java.swing.plaf.windows.WindowsBorders.DashedBorder;
 
 import models.Person;
 import models.TaskInfo;
 import play.*;
+import play.api.data.validation.ValidationError;
 import play.data.Form;
 import play.db.ebean.Model;
 import play.libs.Json;
@@ -22,6 +55,7 @@ import play.mvc.Http.Session;
 import views.html.*;
 import static play.libs.Json.toJson;
 
+@SuppressWarnings("unused")
 public class Application extends Controller {
 
 	public static Result index() {
@@ -38,100 +72,107 @@ public class Application extends Controller {
 		return ok(index.render("User Registered"));
 	}
 
-
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Result createTask() {
 
 		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
 		
-		
 		Person assignedToEmailFound = (Person)new Model.Finder(String.class,Person.class).byId(newTask.getEmailAssignedTo());
 
-		if (assignedToEmailFound != null
-				&& assignedToEmailFound.getEmail().equals(
-						newTask.getEmailAssignedTo())) {
-			String usermail = session("connectedmail"); // Get the user mail
-														// from session and set
-														// it to the created
-														// field in db
-			newTask.setCreatedBy(usermail);
-			
+		if (assignedToEmailFound != null && assignedToEmailFound.getEmail().equals(newTask.getEmailAssignedTo())) {
+				 			String usermail = session("connectedmail"); // Get the user mail
+				 														// from session and set
+				 														// it to the created
+				 														// field in db
+				 			newTask.setCreatedBy(usermail);
+				 			
+				  			newTask.save();
+				 			//return ok(toJson(newTask));
+				 		}			
+				 			
+				 			if (newTask.isRecurring_status()) {
+				 
+				 				for (int i = 1; i < 3; i++) {
+				 
+				 					Application.dbinsertREcurringTask(i);
+				  
+				 				}
+				  
+				 			}
+		if(assignedToEmailFound!=null && assignedToEmailFound.getEmail().equals(newTask.getEmailAssignedTo()))
+		{
 			newTask.save();
-			
-			/*
-			 * 
-			 * If Recurring Task, then add n(2 recurring for simplicity) number
-			 * of tasks to db
-			 */
-
-			if (newTask.isRecurring_status()) {
-
-				for (int i = 1; i < 3; i++) {
-
-					Application.dbinsertREcurringTask(i);
-
-				}
-
-			}
-
+			//return ok(toJson(newTask));
 		}
-			
+		    
 		return ok(views.html.dashboard.render(""));
 
 	}
-	
 
 	public static void dbinsertREcurringTask(int i){
-		
-		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
-		String usermail = session("connectedmail");				//Get the user mail from session and set it to the created field in db
-		newTask.setCreatedBy(usermail);
-		int n=7*i;
-		
-		
-
-		String startdate= newTask.getStartDate();							//Get the start and end date from the db
-		String enddate= newTask.getEndDate();
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");			//Formatting from String to Date data type
-		
-		String dateInString_StartDate=startdate;
-		String dateInString_EndDate=enddate;
-		
-		
-		try {
-			Date date1 = sdf.parse(dateInString_StartDate);
-			Date date2 = sdf.parse(dateInString_EndDate);
-			
-			Calendar c1 = Calendar.getInstance();
-			c1.setTime(date1); 									// Now use the retrieved start date.
-			c1.add(Calendar.DATE, n); 							// Adding n=7 days
-			String output = sdf.format(c1.getTime());
-			newTask.setStartDate(output);
-			
-			Calendar c2 = Calendar.getInstance();
-			c2.setTime(date2); 									// Now use the retrieved end date.
-			c2.add(Calendar.DATE, n); 							// Adding n=7 days
-			String output2 = sdf.format(c2.getTime());
-			newTask.setEndDate(output2);
-			
-			//System.out.println(output);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-			
-		
-		newTask.save();
-		//return ok(toJson(newTask));
+		 		
+		 		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
+		 		String usermail = session("connectedmail");				//Get the user mail from session and set it to the created field in db
+		 		newTask.setCreatedBy(usermail);
+		 		int n=7*i;
+		 		String startdate= newTask.getStartDate();							//Get the start and end date from the db
+		 		String enddate= newTask.getEndDate();
+		 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");			//Formatting from String to Date data type
+		 		
+		 		String dateInString_StartDate=startdate;
+		 		String dateInString_EndDate=enddate;
+		 		
+		 		
+		 		try {
+		 			Date date1 = sdf.parse(dateInString_StartDate);
+		 			Date date2 = sdf.parse(dateInString_EndDate);
+		 			
+		 			Calendar c1 = Calendar.getInstance();
+		 			c1.setTime(date1); 									// Now use the retrieved start date.
+		 			c1.add(Calendar.DATE, n); 							// Adding n=7 days
+		 			String output = sdf.format(c1.getTime());
+		 			newTask.setStartDate(output);
+		 			
+		 			Calendar c2 = Calendar.getInstance();
+		 			c2.setTime(date2); 									// Now use the retrieved end date.
+		 			c2.add(Calendar.DATE, n); 							// Adding n=7 days
+		 			String output2 = sdf.format(c2.getTime());
+		 			newTask.setEndDate(output2);
+		 			
+		 			//System.out.println(output);
+		 		} catch (ParseException e) {
+		 			// TODO Auto-generated catch block
+		 		e.printStackTrace();
+		 		}
+		 			
+		 		
+		 		newTask.save();
+		 		//return ok(toJson(newTask));
+		 		
+		 	}
+	
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static Result showTasks() {
+		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();
+		return ok(toJson(tasks));
 		
 	}
-
-
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static Result showFriends() {
+		List<Person> persons = new Model.Finder(String.class,Person.class).all();
+		return ok(toJson(persons));
+	}
 
 	public static Result getPointsToComplete()  {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));
 		double earnedPoints = currentUser.getScore();
 		double pointsToComplete=0;
 
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		List<Person> otherUsers= new Model.Finder(String.class,Person.class).all(); 
 
 		otherUsers.remove(currentUser);
@@ -151,23 +192,32 @@ public class Application extends Controller {
 		return ok(userPoints);
 
 	}
-
-
-	public static Result showTasks() {
-		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();
-		
-		return ok(toJson(tasks));
-
+	
+	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
+	public static Result showIncompleteTasks()	{
+		//extract all tasks
+		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();
+		//extract incomplete tasks
+		//TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
+		List<TaskInfo> incompleteTasks = null;
+		for(TaskInfo newTask : Tasks)
+		{
+			if(newTask.done==false)
+			{	
+				incompleteTasks.add(newTask);
+			}
+		}
+		//while displaying, place a button, edit task, at the end of task name
+		//edit task will open the add task type of page, where it gives the user, option to assign to himself
+		//TaskInfo task= (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(session("connectedmail"));
+		//return ok(toJson(incompleteTasks));
+		return ok(toJson(incompleteTasks));
 	}
-
-	public static Result showFriends() {
-		List<Person> persons = new Model.Finder(String.class,Person.class).all();
-		return ok(toJson(persons));
-	}
-
-
+	
+	@SuppressWarnings("unchecked")
 	public static Result checkPerson() {
 		Login loginInfo=Form.form(Login.class).bindFromRequest().get();
+		@SuppressWarnings("rawtypes")
 		Person existingPerson = (Person) new Model.Finder(String.class,Person.class).byId(loginInfo.getEmail());
 		if(existingPerson!=null && existingPerson.getPassword().equals(loginInfo.getPassword()))
 		{	
@@ -177,7 +227,7 @@ public class Application extends Controller {
 			session("connectedmail", usermail);	
 			String user = session("connected");
 			if(user != null) ;	
-
+			
 			//return ok("Welcome " + user + usermail);			//Display the username - testing
 			return ok(views.html.dashboard.render("Welcome " + user));
 		}
@@ -186,14 +236,14 @@ public class Application extends Controller {
 
 
 	}
-
-	public static Result endSession() 
-	{                      
+	
+	public static Result endSession() {
 		session().clear();										//Ends user session and redirects to index page
+		String user = session("connected");
 		return redirect(routes.Application.index());	
-	} 
+	}
 
-
+	
 	public static class Login {
 
 		private String email;

@@ -1,19 +1,14 @@
 package models;
 
-import java.util.Date;
-
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Id;
-import javax.validation.Constraint;
 
 import play.data.format.Formats.DateTime;
 import play.data.validation.Constraints.Email;
 import play.data.validation.Constraints.Required;
 import play.db.ebean.Model;
-import views.html.helper.checkbox;
 
+@SuppressWarnings("serial")
 @Entity
 public class Person extends Model {
 

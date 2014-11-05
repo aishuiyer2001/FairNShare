@@ -32,7 +32,8 @@
 				<li><a href="#"><i class="fa  fa-tasks"></i>&nbsp
 						&nbspTasks <span class="fa arrow"></span></a>
 					<ul class="nav nav-second-level">
-						<li><a id="showTasks">My Tasks</a></li>
+						<li><a id="task-page">My Tasks</a></li>
+						<li><a id="incomplete-page">Incomplete Tasks</a></li>
 						<li><a data-toggle="modal" data-target="#myModal">Add
 								Tasks</a></li>
 						<li><a>Manage Tasks</a></li>
@@ -72,7 +73,7 @@
 
 
 <div class="pos userPoints" style="padding-left: 150px; right:655px; padding-top:70px; ">
-		
+
 		<ul class="list-inline list-group">
   			<h4><li class="list-group-item list-group-item-success">Points Earned <span id="earned" style="font-size:17px; width:33px;" class="badge progress-bar-success"></span> </li></h4>
   			
@@ -88,7 +89,10 @@
 	id="task_div">
 	<ul id="tasks"></ul>
 </div>
-
+<div class="pos" style="padding-left: 150px; right: 350px;"
+	id="task_incomplete">
+	<ul id="incompleteTasks"></ul>
+</div>
 <div class="pos" style="padding-left: 850px; right: 350px;"
 	id="task_div">
 	<a href="" id="logout">logout</a>
@@ -99,6 +103,8 @@
 <button id="showFriends" class="btn btn-success">Show Friends</button>
 <ul id="tasks"></ul>
 <button id="showTasks" class="btn btn-success">Show Tasks</button>
+<ul id="incompleTasks"></ul>
+<button id="showIncompleteTasks" class="btn btn-success">Show Incomplete Tasks</button>
 
 
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog"
@@ -118,6 +124,7 @@
 
 						<div class="col-xs-12 col-sm-6 col-md-6">
 							<div class="form-group">
+								<label for="name">Task Name:</label>
 								<input type="text" name="title" id="title"
 									class="form-control input-lg" placeholder="Title" tabindex="1"
 									required>
@@ -125,6 +132,7 @@
 						</div>
 						<div class="col-xs-12 col-sm-6 col-md-6">
 							<div class="form-group">
+								<label for="description">Description:</label>
 								<input type="text" name="description" id="description"
 									class="form-control input-lg" placeholder="Description"
 									tabindex="2" required>
@@ -132,11 +140,13 @@
 						</div>
 					</div>
 					<div class="form-group">
+						<label for="email">Email:</label>
 						<input type="email" name="emailAssignedTo" id="emailAssignedTo"
 							class="form-control input-lg" placeholder="emailAssignedTo"
 							tabindex="3">
 					</div>
 					<div class="form-group">
+						<label for="points">Points for the task:</label>
 						<input type="text" name="points" id="points"
 							class="form-control input-lg" placeholder="points" tabindex="4"
 							required>
@@ -144,6 +154,7 @@
 					<div class="row">
 						<div class="col-xs-12 col-sm-6 col-md-6">
 							<div class="form-group">
+								<label for="start date">Start Date:</label>
 								<input type="text" name="startDate" id="startDate"
 									class="form-control input-lg" placeholder="start date"
 									tabindex="5" required>
@@ -151,6 +162,7 @@
 						</div>
 						<div class="col-xs-12 col-sm-6 col-md-6">
 							<div class="form-group">
+								<label for="end date">End Date:</label>
 								<input type="text" name="endDate" id="endDate"
 									class="form-control input-lg" placeholder="end date"
 									tabindex="6" required>
@@ -158,20 +170,20 @@
 						</div>
 					</div>
 					<div class="row">
-						<div class="col-xs-12 col-sm-7 col-md-6">
-							<div class="form-group">
-								<div class="form-control input-lg" border=0>Recurring Task?
-								</div>
-							</div>
-						</div>
-						<div class="col-xs-1 col-sm-1 col-md-1">
-							<div class="form-group">
-								<input type="checkbox" name="recurring_status" id="recurring_status"
-									class="form-control input-lg"
-									tabindex="7">
-							</div>
-						</div>
-					</div>
+ 						<div class="col-xs-12 col-sm-7 col-md-6">
+ 							<div class="form-group">
+ 								<div class="form-control input-lg" border=0>Recurring Task?
+ 								</div>
+ 							</div>
+ 						</div>
+ 						<div class="col-xs-1 col-sm-1 col-md-1">
+ 							<div class="form-group">
+ 								<input type="checkbox" name="recurring_status" id="recurring_status"
+ 									class="form-control input-lg"
+ 									tabindex="7">
+ 							</div>
+ 						</div>
+ 					</div>
 					<button type="submit" class="btn btn-success">Create Task</button>
 					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 				</form>
