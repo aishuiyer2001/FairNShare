@@ -33,7 +33,17 @@ public class TaskInfo extends Model{
 	@Required
 	private boolean done;
 	
+	private boolean recurring_status;
 	
+	
+	public boolean isRecurring_status() {
+		return recurring_status;
+	}
+
+	public void setRecurring_status(boolean recurring_status) {
+		this.recurring_status = recurring_status;
+	}
+
 	public TaskInfo()
 	{
 	this.done=false;

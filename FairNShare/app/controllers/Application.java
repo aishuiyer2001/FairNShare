@@ -1,21 +1,21 @@
 package controllers;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Timer;
+import java.util.Date;
+import java.util.TimerTask;
 
-
-
-
-
-
-import ch.qos.logback.core.joran.action.ActionUtil.Scope;
-
-import com.sun.java.swing.plaf.windows.WindowsBorders.DashedBorder;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import models.Person;
 import models.TaskInfo;
 import play.*;
 import play.data.Form;
 import play.db.ebean.Model;
+import play.libs.Json;
 import play.mvc.*;
 import play.mvc.Http.Context;
 import play.mvc.Http.Session;
@@ -38,31 +38,128 @@ public class Application extends Controller {
 		return ok(index.render("User Registered"));
 	}
 
-	
+
 	public static Result createTask() {
 
 		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
 		
+		
 		Person assignedToEmailFound = (Person)new Model.Finder(String.class,Person.class).byId(newTask.getEmailAssignedTo());
 
-		if(assignedToEmailFound!=null && assignedToEmailFound.getEmail().equals(newTask.getEmailAssignedTo()))
-		{
+		if (assignedToEmailFound != null
+				&& assignedToEmailFound.getEmail().equals(
+						newTask.getEmailAssignedTo())) {
+			String usermail = session("connectedmail"); // Get the user mail
+														// from session and set
+														// it to the created
+														// field in db
+			newTask.setCreatedBy(usermail);
+			
 			newTask.save();
-			//return ok(toJson(newTask));
-		}			
+			
+			/*
+			 * 
+			 * If Recurring Task, then add n(2 recurring for simplicity) number
+			 * of tasks to db
+			 */
 
+			if (newTask.isRecurring_status()) {
 
+				for (int i = 1; i < 3; i++) {
+
+					Application.dbinsertREcurringTask(i);
+
+				}
+
+			}
+
+		}
+			
 		return ok(views.html.dashboard.render(""));
+
+	}
+	
+
+	public static void dbinsertREcurringTask(int i){
+		
+		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
+		String usermail = session("connectedmail");				//Get the user mail from session and set it to the created field in db
+		newTask.setCreatedBy(usermail);
+		int n=7*i;
+		
+		
+
+		String startdate= newTask.getStartDate();							//Get the start and end date from the db
+		String enddate= newTask.getEndDate();
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");			//Formatting from String to Date data type
+		
+		String dateInString_StartDate=startdate;
+		String dateInString_EndDate=enddate;
+		
+		
+		try {
+			Date date1 = sdf.parse(dateInString_StartDate);
+			Date date2 = sdf.parse(dateInString_EndDate);
+			
+			Calendar c1 = Calendar.getInstance();
+			c1.setTime(date1); 									// Now use the retrieved start date.
+			c1.add(Calendar.DATE, n); 							// Adding n=7 days
+			String output = sdf.format(c1.getTime());
+			newTask.setStartDate(output);
+			
+			Calendar c2 = Calendar.getInstance();
+			c2.setTime(date2); 									// Now use the retrieved end date.
+			c2.add(Calendar.DATE, n); 							// Adding n=7 days
+			String output2 = sdf.format(c2.getTime());
+			newTask.setEndDate(output2);
+			
+			//System.out.println(output);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+			
+		
+		newTask.save();
+		//return ok(toJson(newTask));
+		
+	}
+
+
+
+	public static Result getPointsToComplete()  {
+		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));
+		double earnedPoints = currentUser.getScore();
+		double pointsToComplete=0;
+
+		List<Person> otherUsers= new Model.Finder(String.class,Person.class).all(); 
+
+		otherUsers.remove(currentUser);
+
+		double scoreOfOtherUsers=0;
+		for(Person user : otherUsers)
+			scoreOfOtherUsers += user.getScore();
+		if(otherUsers.size()>0)
+			pointsToComplete=scoreOfOtherUsers/otherUsers.size()-earnedPoints;
+
+		if(pointsToComplete<0)
+			pointsToComplete=0;
+
+		ObjectNode userPoints=Json.newObject();
+		userPoints.put("PointsToComplete", pointsToComplete);
+		userPoints.put("EarnedPoints", earnedPoints);
+		return ok(userPoints);
 
 	}
 
 
 	public static Result showTasks() {
 		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();
-		return ok();
 		
+		return ok(toJson(tasks));
+
 	}
-	
+
 	public static Result showFriends() {
 		List<Person> persons = new Model.Finder(String.class,Person.class).all();
 		return ok(toJson(persons));
@@ -77,10 +174,10 @@ public class Application extends Controller {
 			String username=existingPerson.getFname(); 			//Get the First name by using the primary key email
 			String usermail=existingPerson.getEmail(); 			//Get the email id of the user & set in the session variable to use for other activities
 			session("connected", username);						//Assign it to the session variable
-			session("connectedmail", username);	
+			session("connectedmail", usermail);	
 			String user = session("connected");
 			if(user != null) ;	
-			
+
 			//return ok("Welcome " + user + usermail);			//Display the username - testing
 			return ok(views.html.dashboard.render("Welcome " + user));
 		}
@@ -89,14 +186,14 @@ public class Application extends Controller {
 
 
 	}
-	
-	public static Result endSession() {
-		session().clear();										//Ends user session and redirects to index page
-		String user = session("connected");
-		return redirect(routes.Application.index());	
-	}
 
-	
+	public static Result endSession() 
+	{                      
+		session().clear();										//Ends user session and redirects to index page
+		return redirect(routes.Application.index());	
+	} 
+
+
 	public static class Login {
 
 		private String email;
