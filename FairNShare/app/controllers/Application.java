@@ -190,8 +190,7 @@ public class Application extends Controller {
 		userPoints.put("PointsToComplete", pointsToComplete);
 		userPoints.put("EarnedPoints", earnedPoints);
 		return ok(userPoints);
-
-	}
+		}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes", "null" })
 	public static Result showIncompleteTasks()	{

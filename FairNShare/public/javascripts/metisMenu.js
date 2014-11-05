@@ -20,6 +20,7 @@
         this._name = pluginName;
         this.init();
     }
+    
 
     Plugin.prototype = {
         init: function () {

@@ -3,4 +3,5 @@ function validatePassword(){
     if(x.length<6){
     alert("enter a valid password");
    }
+   
   }

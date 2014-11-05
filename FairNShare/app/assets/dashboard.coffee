@@ -18,7 +18,7 @@ $ ->
          $('#task_incomplete').hide()
          $('#dashboard_div').hide()
          $.each tasks,(index,task) ->
-            $('#task_div').append $('<li class="list-group-item">').text task.title+" Score: "+task.points+"  Start Date:"+task.startDate+" Due: "+task.endDate;
+            $('#task_div').append $('<li class="list-group-item">').text task.title+" Score: "+task.points+"  Start Date:"+task.startDate+" Due Date: "+task.endDate;
             ))
    $(document).on('click', '#incomplete-page', ( ->
       $.get "/showIncompleteTasks",(incompleteTasks) ->
@@ -28,5 +28,5 @@ $ ->
          $('#dashboard_div').hide()
          $('#task_div').hide()
          $.each incompleteTasks,(index,task) ->
-            $('#task_incomplete').append $('<li class="list-group-item">').text task.title+" Score: "+task.points+"   Start Date:"+task.startDate+"  Due: "+task.endDate; 
+            $('#task_incomplete').append $('<li class="list-group-item">').text task.title+" Score: "+task.points+"   Start Date:"+task.startDate+"  Due Date: "+task.endDate; 
             )) 

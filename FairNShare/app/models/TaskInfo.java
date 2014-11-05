@@ -131,6 +131,4 @@ public class TaskInfo extends Model{
 	
 	@Required
 	private int points;
-	
-	
 }

@@ -10,8 +10,8 @@ GET    /showFriends			        controllers.Application.showFriends()
 POST    /createTask			        controllers.Application.createTask()
 GET    /showTasks			        controllers.Application.showTasks()
 GET		/getPointsToComplete		controllers.Application.getPointsToComplete()
-GET		/showIncompleteTasks			controllers.Application.showIncompleteTasks()
-GET    /dashboard						controllers.Application.endSession()
+GET		/showIncompleteTasks		controllers.Application.showIncompleteTasks()
+GET    /dashboard					controllers.Application.endSession()
 #GET    /*name						controllers.Application.endSession(name)
 
 

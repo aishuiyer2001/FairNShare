@@ -105,10 +105,4 @@ public class Person extends Model {
 	public void setScore(int score) {
 		this.score = score;
 	}
-
-	
-
-
-
-
 }

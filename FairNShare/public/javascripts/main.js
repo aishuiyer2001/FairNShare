@@ -25,6 +25,7 @@ $(function() {
         }
     })
 })
+
 $("p").hover(function(){
   $("p").css("background-color","yellow");
   },function(){
