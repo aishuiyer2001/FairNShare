@@ -50,7 +50,18 @@ public class Application extends Controller {
 	}
 
 
-
+	/*
+	 * Gives the points needed by a user to be doing fair share of work
+	 * 
+	 * Implementation :
+	 * Current score of the user is pulled from the database
+	 * Current scores of other users are pulled from the database and its average is computed
+	 * If the given user's current score is less than the average of points earned by other users,
+	 * then the difference in points is shown as the points he needs to achieve in order to be contributing fairly.
+	 * 
+	 * If the difference is negative (i.e. he has earned more points than the average points earned by others,
+	 * then the difference is rounded to 0 and displayed (indicating that he has done fair share of work)
+	 */ 
 	public static Result getPointsToComplete()  {
 		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));
 		double earnedPoints = currentUser.getScore();
