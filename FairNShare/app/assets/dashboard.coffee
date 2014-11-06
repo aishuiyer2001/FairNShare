@@ -5,6 +5,7 @@ $ ->
          $('#friend_div').show()
          $('#friend_div').append $('<h2>').text "My Friends"
          $('#task_div').hide()
+         $('#userPoints').hide()
          $('#dashboard_div').hide()  
          $.each friends,(index,friend) ->
             $('#friend_div').append $('<li class="list-group-item">').text friend.fname+" "+friend.lname
@@ -15,7 +16,8 @@ $ ->
          $('#task_div').append $('<h2>').text "Tasks"
          $('#friend_div').hide()
          $('#dashboard_div').hide()
+         $('#userPoints').hide()
          $.each tasks,(index,task) ->
             $('#task_div').append $('<li class="list-group-item">').text task.title+" Score: "+task.points
             ))
-   
+    
