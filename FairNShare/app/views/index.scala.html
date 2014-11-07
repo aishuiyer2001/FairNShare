@@ -33,7 +33,7 @@
 <!-- form taking email id and password as input, and logging in the user -->
 	<div>
 		<form id="login" class="navbar-form navbar-right" role="form"
- 			action="@routes.Application.checkPerson()" onsubmit="return validatePassword()" method="POST">
+ 			action="@routes.Application.checkPerson()"  method="POST">
 			<div class="form-group">
 				<label for="email">Email&nbsp;</label>
 				<input type="email" placeholder="Email" name="email" id="email"
@@ -45,7 +45,9 @@
 					id="password" class="form-control" style="width:170px; height:35px" required>
 			</div>
 			<button type="submit" class="btn btn-primary">Sign in</button>
+			<h4>@message</h4>
 		</form>
+		
 	</div>
 
 <!-- end of form -->

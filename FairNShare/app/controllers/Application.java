@@ -329,6 +329,8 @@ import static play.libs.Json.toJson;
 	
 	@SuppressWarnings("unchecked")
 	
+	
+	
 			
 	public static Result checkPerson() {																//check if the person exists in the database or not
 		Login loginInfo=Form.form(Login.class).bindFromRequest().get();		
@@ -342,14 +344,10 @@ import static play.libs.Json.toJson;
 			session("connected", username);						//Assign it to the session variable
 			session("connectedmail", usermail);	
 			String user = session("connected");
-			if(user != null) ;	
-
-			//return ok("Welcome " + user + usermail);			//Display the username - testing
 			return ok(views.html.dashboard.render("Welcome " + user));
 		}
 
-		return redirect(routes.Application.index());
-
+		return ok(index.render("Invalid username or password!"));
 
 	}
 
