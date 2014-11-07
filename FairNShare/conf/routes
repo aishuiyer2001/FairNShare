@@ -12,7 +12,10 @@ GET    /showTasks			        controllers.Application.showTasks()
 GET		/getPointsToComplete		controllers.Application.getPointsToComplete()
 GET		/showIncompleteTasks		controllers.Application.showIncompleteTasks()
 GET    /dashboard					controllers.Application.endSession()
+GET    /taskUpdate					controllers.Application.taskUpdate()
+GET    /showMyTasks					controllers.Application.showMyTasks()
 #GET    /*name						controllers.Application.endSession(name)
+GET		/personUpdate				controllers.Application.personUpdate()
 
 
 # Map static resources from the /public folder to the /assets URL path
