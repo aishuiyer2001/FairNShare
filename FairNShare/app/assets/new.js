@@ -1,10 +1,20 @@
 $(document).ready(
+		
+		/* displays the points earned by user and points needed by him to do fair share of work,
+		* when the user is redirected to the dashboard after log in
+		*/
+		
     function() {       
         $.get("/getPointsToComplete",function(data,status){
              $("#toComplete").text(data.PointsToComplete);
              $("#earned").text(data.EarnedPoints);
                      });    
         
+        
+        
+        /* displays the points earned by user and points needed by him to do fair share of work,
+		* when the user clicks the notifications tab on the left menu bar
+		*/
         
 $("#notifications").click(function(){
   $("#task_div").hide();
@@ -18,6 +28,11 @@ $("#notifications").click(function(){
 
            });
         });        
+
+
+/* displays the points earned by user and points needed by him to do fair share of work,
+* when the user clicks the dashboard tab on the left menu bar
+*/
 
 $("#dashboard_nav").click(function(){
       $("#task_div").hide();
