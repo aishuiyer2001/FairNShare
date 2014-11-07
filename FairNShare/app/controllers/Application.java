@@ -62,24 +62,37 @@ public class Application extends Controller {
 	 * If the difference is negative (i.e. he has earned more points than the average points earned by others,
 	 * then the difference is rounded to 0 and displayed (indicating that he has done fair share of work)
 	 */ 
+	
 	public static Result getPointsToComplete()  {
-		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));
-		double earnedPoints = currentUser.getScore();
-		double pointsToComplete=0;
+		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));	// get current user from session
+		double earnedPoints = currentUser.getScore();					//get points earned by him until now
+		double pointsToComplete=0;										
 
-		List<Person> otherUsers= new Model.Finder(String.class,Person.class).all(); 
+		// get a list of other roommates by getting all the roommates and removing the currently logged in user from the list
+		List<Person> otherUsers= new Model.Finder(String.class,Person.class).all(); 	
+		otherUsers.remove(currentUser);				
 
-		otherUsers.remove(currentUser);
-
+		// get average score of other users
 		double scoreOfOtherUsers=0;
 		for(Person user : otherUsers)
 			scoreOfOtherUsers += user.getScore();
-		if(otherUsers.size()>0)
+		
+		/* Here, Exception handling is done.
+		* Case: if currently logged in user is the only user in the database & none of his roommates are registered,
+		* then otherUsers will be 0. So, when finding average using the formula : (sum of scores)/No.Of.Users,
+		* the denominator would throw a divideByZero Exception or NumberFormatException.
+		* But the case has been handled by performing division only if there are other users in the database. ( as shown below)
+		*/
+		if(otherUsers.size()>0)    
 			pointsToComplete=scoreOfOtherUsers/otherUsers.size()-earnedPoints;
 
+		/* If current user's earned points are above the average of other's points, 
+		*then the negative difference is rounded to zero. 
+		*/
 		if(pointsToComplete<0)
 			pointsToComplete=0;
 
+		// User points are packaged in a JSON object and sent to the UI
 		ObjectNode userPoints=Json.newObject();
 		userPoints.put("PointsToComplete", pointsToComplete);
 		userPoints.put("EarnedPoints", earnedPoints);
