@@ -1,16 +1,14 @@
 package models;
 
-import java.util.Date;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import play.data.format.Formats.DateTime;
 import play.data.validation.Constraints.Email;
 import play.data.validation.Constraints.Required;
 import play.db.ebean.Model;
+@SuppressWarnings("serial")
 @Entity
 public class TaskInfo extends Model{
 
@@ -33,14 +31,26 @@ public class TaskInfo extends Model{
 	@Required
 	private boolean done;
 	
+	private boolean recurring_status;
 	
+	
+	public boolean isRecurring_status() {
+		return recurring_status;
+	}
+
+	public void setRecurring_status(boolean recurring_status) {
+		this.recurring_status = recurring_status;
+	}
+
 	public TaskInfo()
 	{
 	this.done=false;
 	this.points=0;
 	}
 	
-	public long getTaskID() {
+	
+	
+	 public long getTaskID() {
 		return taskID;
 	}
 
@@ -122,6 +132,4 @@ public class TaskInfo extends Model{
 	
 	@Required
 	private int points;
-	
-	
 }

@@ -22,6 +22,7 @@ create table task_info (
   created_by                varchar(255),
   email_assigned_to         varchar(255),
   done                      boolean,
+  recurring_status          boolean,
   start_date                varchar(255),
   end_date                  varchar(255),
   points                    integer,

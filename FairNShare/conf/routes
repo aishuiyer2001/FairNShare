@@ -6,10 +6,21 @@
 GET     /                           controllers.Application.index()
 POST	/person						controllers.Application.addPerson()
 POST    /dashboard					controllers.Application.checkPerson()
+GET		/getPointsToComplete		controllers.Application.getPointsToComplete()
 GET    /showFriends			        controllers.Application.showFriends()
 POST    /createTask			        controllers.Application.createTask()
 GET    /showTasks			        controllers.Application.showTasks()
-
+GET    /dashboard					controllers.Application.endSession()
+GET     /showFriends			    controllers.Application.showFriends()
+POST    /createTask			        controllers.Application.createTask()
+GET     /showTasks			        controllers.Application.showTasks()
+GET		/getPointsToComplete		controllers.Application.getPointsToComplete()
+GET		/showIncompleteTasks		controllers.Application.showIncompleteTasks()
+POST    /taskUpdate					controllers.Application.taskUpdate()
+GET     /showMyTasks				controllers.Application.showMyTasks()
+#GET    /*name						controllers.Application.endSession(name)
+POST	/personUpdate				controllers.Application.personUpdate()
+GET     /showMyRecurringTasks       controllers.Application.showMyRecurringTasks()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
