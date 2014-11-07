@@ -38,17 +38,43 @@ public class ApplicationTest {
 	//Unit tests to check whether the html pages are being rendered properly or not
 	  
     @Test
-    public void renderIndexTemplateTest() {           //Unit test to check whether index page is rendered properly or not
-        Content html = views.html.index.render("Sign Up.");//Giving Sign Up. as content to be displayed on index page
-        assertThat(contentType(html)).isEqualTo("text/html");//Stating that input content given is either text or html
-        assertThat(contentAsString(html)).contains("Sign Up.");//Checking whether the input given is being rendered on index page or not
+    public void renderIndexTemplateTest() {                     //Unit test to check whether index page is rendered properly or not
+        Content html = views.html.index.render("Sign Up.");     //Giving Sign Up. as content to be displayed on index page
+        assertThat(contentType(html)).isEqualTo("text/html");   //Stating that input content given is either text or html
+        assertThat(contentAsString(html)).contains("Sign Up."); //Checking whether the input given is being rendered on index page or not
     }
 
     @Test
-    public void renderDashboardTemplateTest() {          //Unit test to check whether dashboard page is rendered properly or not
+    public void renderDashboardTemplateTest() {               //Unit test to check whether dashboard page is rendered properly or not
         Content html = views.html.dashboard.render("Welcome");
         assertThat(contentType(html)).isEqualTo("text/html");
         assertThat(contentAsString(html)).contains("Welcome");//Checking whether the input given is being rendered on dashboard page or not
     }
 
+    //Unit tests to check whether routing to html templates through URL's is being done properly or not
+    
+    @Test
+    public void indexRouteTest() {                          //Unit test to check whether routing URL is loading properly or not
+		Result result = routeAndCall(fakeRequest(GET, "/"));//A fake request is sent to load index template
+        assertThat(result).isNotNull();                     //Asserts that routing is successful and not null
+    }
+    
+    @Test
+    public void dashboardRouteTest() {                      //Performs the same test as above test case for dashboard template
+        Result result = routeAndCall(fakeRequest(GET, "/dashboard"));
+        assertThat(result).isNotNull();
+    }
+   
+
+    //Unit tests to check whether controllers are routing to the intended html template or not
+
+    @Test
+    public void callIndexTest() {                                               //Unit test to check whether the controller calls correct html template or not  
+        Result result = callAction(controllers.routes.ref.Application.index()); //Call given to index template
+        assertThat(status(result)).isEqualTo(OK);
+        assertThat(contentType(result)).isEqualTo("text/html");                 //Checks whether the template loaded has text/html content
+        assertThat(charset(result)).isEqualTo("utf-8");                         //Checks for charset of template
+        assertThat(contentAsString(result)).contains("Sign Up.");               //Checks for content Sign Up. on index template to ensure correct template has been rendered
+    }
+   
    }
