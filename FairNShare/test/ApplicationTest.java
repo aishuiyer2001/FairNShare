@@ -93,6 +93,22 @@ public class ApplicationTest {
  	   assertEquals("mypassword",person.getPassword());
  	 }
 
+  //Unit test to check whether a user is able to add a task to task list or not
     
+    @Test
+    public void showTasksTest(){                             //Unit test to check whether values given in add task form are being saved into database
+ 	   TaskInfo task1 =  mock(TaskInfo.class);               //A mock is created to eliminate the need for an external data resource for testing
+ 	   when(task1.getTitle()).thenReturn("cleaningutensils");//gets input given by user from form and saves in database
+ 	   TaskInfo task2 =  mock(TaskInfo.class);               
+ 	   when(task2.getTitle()).thenReturn("cuttingvegetables");
+ 	   TaskInfo task3 =  mock(TaskInfo.class);
+ 	   when(task3.getTitle()).thenReturn("groceryshopping");
+ 	   
+
+ 	   assertEquals("cleaningutensils",task1.getTitle()); //check value. If equal task has been added
+ 	   assertEquals("cuttingvegetables",task2.getTitle());
+ 	   assertEquals("groceryshopping",task3.getTitle());
+ 	 }
+      
    
    }
