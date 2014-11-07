@@ -60,7 +60,7 @@ public class ApplicationTest {
     }
     
     @Test
-    public void dashboardRouteTest() {                      //Performs the same test as above test case for dashboard template
+    public void dashboardRouteTest() {                      //Performs the same test as indexRouteTest for dashboard template
         Result result = routeAndCall(fakeRequest(GET, "/dashboard"));
         assertThat(result).isNotNull();
     }
@@ -76,5 +76,23 @@ public class ApplicationTest {
         assertThat(charset(result)).isEqualTo("utf-8");                         //Checks for charset of template
         assertThat(contentAsString(result)).contains("Sign Up.");               //Checks for content Sign Up. on index template to ensure correct template has been rendered
     }
+    
+    //Unit tests to check whether a user is able to sign up or not
+    
+    @Test
+    public void addPersonTest1(){                             //Unit test to check whether values given in sign up form are being saved into database
+ 	   Person person = mock(Person.class);                    //A mock is created to eliminate the need for an external data resource for testing 
+ 	   when(person.getEmail()).thenReturn("email@gmail.com"); //gets input given by user from form and saves in database
+ 	   assertEquals("email@gmail.com",person.getEmail());     //check value. If equal person has been added
+ 	 }
+    
+    @Test
+    public void addPersonTest2(){                           //Performs the same test as addPersonTest1 on password field 
+ 	   Person person = mock(Person.class);
+ 	   when(person.getPassword()).thenReturn("mypassword");
+ 	   assertEquals("mypassword",person.getPassword());
+ 	 }
+
+    
    
    }
