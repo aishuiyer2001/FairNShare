@@ -68,18 +68,21 @@ import views.html.*;
 import static play.libs.Json.toJson;
 
 @SuppressWarnings("unused")
-public class Application extends Controller {
-
+	public class Application extends Controller {
+	
 	public static Result index() {
 
 		return ok(index.render(""));
 	}
 
+	
 	public static Result loginFail() {
 		 
 		 		return ok(index.render("Login Fail"));
 		 	}
 
+	
+	
 	public static Result addPerson() {
 
 		Person person=Form.form(Person.class).bindFromRequest().get();
@@ -90,6 +93,8 @@ public class Application extends Controller {
 
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
+	
+	
 	public static Result createTask() {
 
 		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
@@ -158,6 +163,10 @@ public class Application extends Controller {
 		 		 		return ok(views.html.dashboard.render(""));
 		 		 	  
   	}
+	
+	
+	
+	
 	public static void dbinsertREcurringTask(int i,int j,int type_recurring){
 		 		 		
 		 		 		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
@@ -166,7 +175,7 @@ public class Application extends Controller {
 		 		 		int n=j*i;													//generate value of recurring tasks using the loop to add i number of times in db
 		 		 		String startdate= newTask.getStartDate();					//Get the start and end date from the db
 		 		 		String enddate= newTask.getEndDate();
-		 		 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");	//Formatting from String to Date data type
+		 		 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");	//Formatting from String to Date data type
 		 		 		
 		 		 		String dateInString_StartDate=startdate;
 		 		 		String dateInString_EndDate=enddate;
@@ -213,63 +222,76 @@ public class Application extends Controller {
 		 		 		newTask.save();
 		  		
 		 		 	}	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static Result showTasks() {		//method to show all tasks in the system
+	public static Result showTasks() {												//method to show all tasks in the system
 		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all(); //extracting all tasks from the database
-		return ok(toJson(tasks));  //passing the tasks as a json object
+		return ok(toJson(tasks));  													//passing the tasks as a json object
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static Result showMyTasks(){  			//method to show only user tasks in the system, i.e, only tasks assigned to the particular user
+	
+	
+	public static Result showMyTasks(){  													//method to show only user tasks in the system, i.e, only tasks assigned to the particular user
 		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();			//extracting all tasks from the ddatabase into a list
 		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));
-		List<TaskInfo> myTasks = new ArrayList<TaskInfo>();			//creating an empty list of the type object TaskInfo
-		String usermail = session("connectedmail");			//getting the current session email of the current user
-		for(TaskInfo eachTask:tasks)						//for each task in the list of tasks
+		List<TaskInfo> myTasks = new ArrayList<TaskInfo>();									//creating an empty list of the type object TaskInfo
+		String usermail = session("connectedmail");											//getting the current session email of the current user
+		for(TaskInfo eachTask:tasks)														//for each task in the list of tasks
 		{	
 			System.out.println("SUCCESS");
 			if(eachTask.getEmailAssignedTo().equalsIgnoreCase(currentUser.getEmail()))		//the email to which the task is assigned is checked with the current session email
-				myTasks.add(eachTask);									//if they are equal, the task is added to the mist myTasks
+				myTasks.add(eachTask);														//if they are equal, the task is added to the mist myTasks
 		}
-		return ok(toJson(myTasks));				//list myTasks is sent as a json object
+		return ok(toJson(myTasks));															//list myTasks is sent as a json object
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static Result taskUpdate() {						//method to update task which is incomplete, to assign it to the user himself
-		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();			//extracting all tasks
-		TaskInfo eachTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(33);		//getting each task by its id
-		String usermail = session("connectedmail"); 		//getting the current email session of the user
-		eachTask.setEmailAssignedTo(usermail);				//changing the email task assigned to, to the current user
-		eachTask.save();									//saving the entry for the task in database
-		return ok(toJson(tasks));						
+	
+	public static Result taskUpdate() {											//method to update task which is incomplete, to assign it to the user himself
+		TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
+		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(currentTask.getTaskID());
+		String usermail = session("connectedmail"); 							//getting the current email session of the user
+		existingTask.setEmailAssignedTo(usermail);								//changing the email task assigned to, to the current user
+		existingTask.save();													//saving the entry for the task in database
+		return ok(views.html.dashboard.render(""));
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static Result showFriends() {				//method to show friends
-		List<Person> persons = new Model.Finder(String.class,Person.class).all(); //extracting all the persons in the database
-		return ok(toJson(persons));		//passing persons as Json object for displaying
+	
+	public static Result showFriends() {											//method to show friends
+		List<Person> persons = new Model.Finder(String.class,Person.class).all(); 	//extracting all the persons in the database
+		return ok(toJson(persons));													//passing persons as Json object for displaying
 	}
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	
-	public static Result personUpdate(){		//method to update the score of a person, takes task as the parameter
-		
-		TaskInfo newTask=new TaskInfo();
-		newTask.done=true;			//for that particular task, we change in the database that the task is done
-		String usermail=newTask.getEmailAssignedTo();		//we get the user email id who is assigned to the task
+	
+	public static Result personUpdate(){											//method to update the score of a person, takes task as the parameter
+		 
+		TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
+		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(currentTask.getTaskID());
+		System.out.println("title : "+existingTask.getTitle()+ existingTask.getDone());
+		existingTask.setDone(true);
+		System.out.println("title : "+existingTask.getTitle()+ existingTask.getDone());
+		existingTask.save();
+		//for that particular task, we change in the database that the task is done
+		//we get the user email id who is assigned to the task
 		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));		//we extract the user based on the email id obtained above
-		int currentscore = currentUser.getScore();		//the already present score of the user the taken into currentscore by using getter
-		currentUser.setScore(newTask.getPoints()+currentscore);	//now, the score of user is set to current score+ points of the task which he has done
-		return ok("YOUR TASK IS DONE!! YIPPIEE!!");
-	}
-	public static Result getPointsToComplete()  {    //method to get points required by the user to reach threshold
+		int currentscore = currentUser.getScore();						//the already present score of the user the taken into currentscore by using getter
+		currentUser.setScore(existingTask.getPoints()+currentscore);	//now, the score of user is set to current score+ points of the task which he has done
+		currentUser.save();
+		return ok(views.html.dashboard.render(""));
+		}
+	
+	public static Result getPointsToComplete()  {    										//method to get points required by the user to reach threshold
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));   //getting the current user by session email
+		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));   		//getting the current user by session email
 		double earnedPoints = currentUser.getScore();   //score of the user till now is obtained by getter
-		double pointsToComplete=0;				//points to complete   
+		double pointsToComplete=0;						//points to complete   
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		List<Person> otherUsers= new Model.Finder(String.class,Person.class).all();    //taking list of all other users, and removing the current user from the whole users list    
-//by this, we are creating a threshold value for the no. of points
+		List<Person> otherUsers= new Model.Finder(String.class,Person.class).all();    
+									//taking list of all other users, and removing the current user from the whole users list    
+									//by this, we are creating a threshold value for the no. of points
 		otherUsers.remove(currentUser);
-//finding threshold
+									//finding threshold
 		double scoreOfOtherUsers=0;
 		for(Person user : otherUsers)
 			scoreOfOtherUsers += user.getScore();
@@ -278,7 +300,7 @@ public class Application extends Controller {
 
 		if(pointsToComplete<0)
 			pointsToComplete=0;
-//setting object with points needed more to complete, and points already achieved by the user
+									//setting object with points needed more to complete, and points already achieved by the user
 		ObjectNode userPoints=Json.newObject();
 		userPoints.put("PointsToComplete", pointsToComplete);
 		userPoints.put("EarnedPoints", earnedPoints);
@@ -286,25 +308,29 @@ public class Application extends Controller {
 		}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static Result showIncompleteTasks()	{    //to show incomplete tasks out of the whole list of tasks
-		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();  //list with all the tasks
-		List<TaskInfo> incompleteTasks = new ArrayList<TaskInfo>();   //empty list taken as array for purpose
-		for(TaskInfo eachTask : Tasks)  //for each task in the list of all tasks,
-		if(!eachTask.getDone())			//if the status of the task is not done,
-			incompleteTasks.add(eachTask);		//that task is added to the incompleteTasks list
-		return ok(toJson(incompleteTasks));		//the incompleteTasks list with all the tasks in a list is sent as Json Object
+	
+	
+	public static Result showIncompleteTasks()	{    									//to show incomplete tasks out of the whole list of tasks
+		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();  		//list with all the tasks
+		List<TaskInfo> incompleteTasks = new ArrayList<TaskInfo>();  					 //empty list taken as array for purpose
+		for(TaskInfo eachTask : Tasks)  																//for each task in the list of all tasks,
+		if(!eachTask.getDone() &&  !eachTask.getEmailAssignedTo().equalsIgnoreCase(session("connectedmail")))			//if the status of the task is not done,
+			incompleteTasks.add(eachTask);											    	//that task is added to the incompleteTasks list
+		return ok(toJson(incompleteTasks));										//the incompleteTasks list with all the tasks in a list is sent as Json Object
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Result checkPerson() {			//check if the person exists in the database or not
+	
+			
+	public static Result checkPerson() {																//check if the person exists in the database or not
 		Login loginInfo=Form.form(Login.class).bindFromRequest().get();		
 		@SuppressWarnings("rawtypes")
 		Person existingPerson = (Person) new Model.Finder(String.class,Person.class).byId(loginInfo.getEmail());
 		if(existingPerson!=null && existingPerson.getPassword().equals(loginInfo.getPassword()))		//if there exists a person, and the password matches,
 		{	
-			String username=existingPerson.getFname(); 			//Get the First name by using the primary key email
-			String usermail=existingPerson.getEmail(); 			//Get the email id of the user & set in the session variable to use for other activities
-			session("connected", username);						//Assign it to the session variable
+			String username=existingPerson.getFname(); 													//Get the First name by using the primary key email
+			String usermail=existingPerson.getEmail(); 									//Get the email id of the user & set in the session variable to use for other activities
+			session("connected", username);										//Assign it to the session variable
 			session("connectedmail", usermail);	
 			String user = session("connected");
 			if(user != null) ;	
@@ -312,9 +338,8 @@ public class Application extends Controller {
 			return ok(views.html.dashboard.render("Welcome " + user));
 		}
 			return ok(index.render("Invalid username or password!"));
-			 		//return redirect(routes.Application.index());
-			 		
-			 		/* New approach to display the invalid login message 
+			 	
+			/* New approach to display the invalid login message 
 			 		Application l= new Application();
 			 		l.loginFail();
 			 	*/
@@ -345,4 +370,15 @@ public class Application extends Controller {
 			this.password = password;
 		}
 	}
-}
+	
+	public static class TaskIDRetrieval{
+		private String taskID;
+		public String getTaskID()
+		{
+			return taskID;
+		}
+		public void setTaskID(String taskID) {
+			this.taskID = taskID;
+		}
+	
+}}

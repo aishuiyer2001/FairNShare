@@ -4,6 +4,7 @@ $(document).ready(
             $("#toComplete").text(data.PointsToComplete);
             $("#earned").text(data.EarnedPoints);
         });
+        
  $("#notifications").click(function(){
   $("#task_div").hide();
   $('#friend_div').hide();

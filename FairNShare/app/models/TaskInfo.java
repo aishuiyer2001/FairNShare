@@ -16,7 +16,7 @@ public class TaskInfo extends Model{
 	private long taskID;
 	
 	@Required(message = "validation.required.emphasis")
-	public String title;
+	private String title;
 	
 	private String description;
 	
@@ -29,7 +29,7 @@ public class TaskInfo extends Model{
 	private String emailAssignedTo;
 	
 	@Required
-	public boolean done;
+	private boolean done;
 	
 	
 	public TaskInfo()
