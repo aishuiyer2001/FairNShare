@@ -3,23 +3,27 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index()
+GET     /                         controllers.Application.index()
 POST	/person						controllers.Application.addPerson()
+
 POST    /dashboard					controllers.Application.checkPerson()
 GET		/getPointsToComplete		controllers.Application.getPointsToComplete()
 GET    /showFriends			        controllers.Application.showFriends()
 POST    /createTask			        controllers.Application.createTask()
 GET    /showTasks			        controllers.Application.showTasks()
-GET    /dashboard					controllers.Application.endSession()
+GET    /logout					controllers.Application.endSession()
 GET     /showFriends			    controllers.Application.showFriends()
 POST    /createTask			        controllers.Application.createTask()
 GET     /showTasks			        controllers.Application.showTasks()
 GET		/getPointsToComplete		controllers.Application.getPointsToComplete()
 GET		/showIncompleteTasks		controllers.Application.showIncompleteTasks()
-POST    /taskUpdate					controllers.Application.taskUpdate()
+POST    /taskUpdate/:taskID			controllers.Application.taskUpdate(taskID)
 GET     /showMyTasks				controllers.Application.showMyTasks()
 #GET    /*name						controllers.Application.endSession(name)
-POST	/personUpdate				controllers.Application.personUpdate()
+
+# on clicking the url of dashboard
+GET    /dashboard                  controllers.Application.redirectDashBoardURL()
+POST	/personUpdate/:taskID			controllers.Application.personUpdate(taskID)
 GET     /showMyRecurringTasks       controllers.Application.showMyRecurringTasks()
 
 # Map static resources from the /public folder to the /assets URL path

@@ -1,5 +1,5 @@
 package controllers;
-
+import views.html.*;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.text.ParseException;
@@ -25,7 +25,7 @@ import play.libs.Json;
 import play.mvc.*;
 import play.mvc.Http.Context;
 import play.mvc.Http.Session;
-import views.html.*;
+
 import static play.libs.Json.toJson;
 
 @SuppressWarnings("unused")
@@ -42,7 +42,13 @@ import static play.libs.Json.toJson;
 		 		return ok(index.render("Login Fail"));
 		 	}
 
-	
+	public static Result redirectDashBoardURL() {
+		String user = session("connected");
+		
+		if(user==null)
+			return redirect(routes.Application.index());
+		return ok(views.html.dashboard.render("Welcome " + user));
+	}
 	
 	public static Result addPerson() {
 
@@ -222,9 +228,11 @@ import static play.libs.Json.toJson;
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	
-	public static Result taskUpdate() {											//method to update task which is incomplete, to assign it to the user himself
-		TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
-		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(currentTask.getTaskID());
+	public static Result taskUpdate(String taskID) {											//method to update task which is incomplete, to assign it to the user himself
+		//TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
+		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
+		
+		System.out.println("taskID"+taskID);
 		String usermail = session("connectedmail"); 							//getting the current email session of the user
 		existingTask.setEmailAssignedTo(usermail);								//changing the email task assigned to, to the current user
 		existingTask.save();													//saving the entry for the task in database
@@ -295,10 +303,10 @@ import static play.libs.Json.toJson;
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	
 	
-	public static Result personUpdate(){											//method to update the score of a person, takes task as the parameter
+	public static Result personUpdate(String taskID){											//method to update the score of a person, takes task as the parameter
 		 
-		TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
-		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(currentTask.getTaskID());
+		//TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
+		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
 		System.out.println("title : "+existingTask.getTitle()+ existingTask.getDone());
 		existingTask.setDone(true);
 		System.out.println("title : "+existingTask.getTitle()+ existingTask.getDone());
@@ -355,6 +363,7 @@ import static play.libs.Json.toJson;
 	{                      
 		session().clear();										//Ends user session and redirects to index page
 		String user = session("connected");
+		System.out.println("user "+user);
 		return redirect(routes.Application.index());	
 	} 
 
