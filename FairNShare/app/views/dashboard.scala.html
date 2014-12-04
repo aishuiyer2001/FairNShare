@@ -37,6 +37,11 @@
 						<li><a id="mytask-page" style="cursor:hand;">My Tasks</a></li>
 						<li><a id="myRecurringtask-page" style="cursor:hand;">My Recurring Tasks</a></li>
 						<li><a id="incomplete-page" style="cursor:hand;">Incomplete Tasks</a></li>
+						<li><a href="#">Overdue Tasks <span class="fa arrow"></span></a>
+						<ul class="nav nav-second-level">
+						<li><a id="alloverdue-page" style="cursor:hand;">All Overdue Tasks</a></li>
+						<li><a id="myoverdue-page" style="cursor:hand;">My Overdue Tasks</a></li>
+						</ul> <!-- /.nav-second-level --></li>
 						<li><a data-toggle="modal" data-target="#myModal" style="cursor:hand;">Add
 								Tasks</a></li>
 						<li><a style="cursor:hand;">Manage Tasks</a></li>
@@ -87,6 +92,14 @@
 	id="task_incomplete">
 	<ul id="incompleteTasks"></ul>
 </div>
+<div class="pos" style="padding-left: 150px; right: 350px;"
+	id="alltask_overdue">
+	<ul id="alloverdueTasks"></ul>
+</div>
+<div class="pos" style="padding-left: 150px; right: 350px;"
+	id="mytask_overdue">
+	<ul id="myoverdueTasks"></ul>
+</div>
 
 <div class="pos" style="padding-left: 150px; right: 350px;"
 	id="task_recurring">
@@ -106,6 +119,7 @@
 	<a href="/logout" class="btn btn-primary" id="logout">LOGOUT</a>
 </div>
 
+<!--
 <ul id="friends"></ul>
 <button id="showFriends" class="btn btn-success">Show Friends</button>
 <ul id="tasks"></ul>
@@ -114,7 +128,9 @@
 <button id="showIncompleteTasks" class="btn btn-success">Show Incomplete Tasks</button>
 <ul id="mytasks"></ul>
 <button id="showMyTasks" class="btn btn-success">Show My Tasks</button>
-
+<ul id="incompleTasks"></ul>
+<button id="showIncompleteTasks" class="btn btn-success">Show Incomplete Tasks</button>
+-->
 
 <!-- End of id references for various elements in the code-->
 

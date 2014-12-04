@@ -1,19 +1,27 @@
 package controllers;
 import views.html.*;
+
 import java.awt.Window;
 import java.awt.event.WindowEvent;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import javax.swing.JButton;
+
 import org.h2.engine.User;
+
 import ch.qos.logback.core.joran.action.ActionUtil.Scope;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sun.java.swing.plaf.windows.WindowsBorders.DashedBorder;
+
 import models.Person;
 import models.TaskInfo;
 import play.*;
@@ -25,7 +33,6 @@ import play.libs.Json;
 import play.mvc.*;
 import play.mvc.Http.Context;
 import play.mvc.Http.Session;
-
 import static play.libs.Json.toJson;
 
 @SuppressWarnings("unused")
@@ -325,20 +332,52 @@ import static play.libs.Json.toJson;
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	
 	
-	public static Result showIncompleteTasks()	{    									//to show incomplete tasks out of the whole list of tasks
+	public static Result showIncompleteTasks() throws Exception	{    									//to show incomplete tasks out of the whole list of tasks
 		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();  		//list with all the tasks
 		List<TaskInfo> incompleteTasks = new ArrayList<TaskInfo>();  					 //empty list taken as array for purpose
 		for(TaskInfo eachTask : Tasks)  																//for each task in the list of all tasks,
 		if(!eachTask.getDone() &&  !eachTask.getEmailAssignedTo().equalsIgnoreCase(session("connectedmail")))			//if the status of the task is not done,
 			incompleteTasks.add(eachTask);											    	//that task is added to the incompleteTasks list
+		
 		return ok(toJson(incompleteTasks));										//the incompleteTasks list with all the tasks in a list is sent as Json Object
 
 	}
 	
 	@SuppressWarnings("unchecked")
 	
+	public static Result showAllOverdueTasks() throws ParseException	{
+		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();			//taking list of all existing tasks
+		List<TaskInfo> overdueTasks = new ArrayList<TaskInfo>();		//a new list to add each overdue task to
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");		//specifying the date format to be followed
+		Date date1 = new Date();	//a new Date object gives us the current system time
+		String enddate_string;	//string to take end date in
+		for(TaskInfo eachTask : Tasks){			//for each task in the list of tasks
+			enddate_string = eachTask.getEndDate();		//getting the end date of the task
+			Date date2 = dateFormat.parse(enddate_string);		//converting the end date string into required date format
+			if(date1.after(date2))			//if currrent date is after the end date of tasks
+				overdueTasks.add(eachTask);		//add that task to list of overdue tasks
+		}
+		return ok(toJson(overdueTasks));		//return overdue tasks
+	}
 	
-	
+	public static Result showMyOverdueTasks() throws ParseException	{
+		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();			//taking list of all existing tasks
+		List<TaskInfo> overdueTasks = new ArrayList<TaskInfo>();		//a new list to add each overdue task to
+		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));
+		String usermail = session("connectedmail");
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");		//specifying the date format to be followed
+		Date date1 = new Date();	//a new Date object gives us the current system time
+		String enddate_string;	//string to take end date in
+		for(TaskInfo eachTask : Tasks){			//for each task in the list of tasks
+			enddate_string = eachTask.getEndDate();		//getting the end date of the task
+			Date date2 = dateFormat.parse(enddate_string);		//converting the end date string into required date format
+			if(date1.after(date2) && eachTask.getEmailAssignedTo().equalsIgnoreCase(currentUser.getEmail()))			//if currrent date is after the end date of tasks
+				overdueTasks.add(eachTask);		//add that task to list of overdue tasks
+				//the email to which the task is assigned is checked with the current session email
+				//if they are equal, the task is added to the list of the user's overdue tasks
+		}
+		return ok(toJson(overdueTasks));		//return overdue tasks
+	}
 			
 	public static Result checkPerson() {																//check if the person exists in the database or not
 		Login loginInfo=Form.form(Login.class).bindFromRequest().get();		

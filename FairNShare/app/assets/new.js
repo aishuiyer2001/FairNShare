@@ -69,6 +69,47 @@ $(document).ready(
 				});
 			});
 			});
+			
+			/* displays the overdue tasks out of all incomplete tasks */
+			$("#alloverdue-page").click(function(){
+				$.get("/showAllOverdueTasks",function(alloverdueTasks,status){
+					$('#friend_div').hide();
+					$('#mytask_div').hide();
+					$('#task_recurring').hide();
+					$("#notification_div").hide();
+					$('#userPoints').hide();
+					$('#dashboard_div').hide();
+					$('#task_div').hide();
+					$('#mytask_overdue').hide();
+					$('#alltask_overdue').prepend("<h2>All Overdue Tasks</h2>");
+					$('#alltask_overdue').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score");
+					jQuery.each(alloverdueTasks, function(i,task) {
+						$('#alltask_overdue').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.points+'</li></td></tr>');
+						$('#alltask_overdue').show();
+				});
+			});
+			});
+
+			/* displays the overdue tasks of the user */
+			$("#myoverdue-page").click(function(){
+				$.get("/showMyOverdueTasks",function(myoverdueTasks,status){
+					$('#friend_div').hide();
+					$('#mytask_div').hide();
+					$('#task_recurring').hide();
+					$("#notification_div").hide();
+					$('#userPoints').hide();
+					$('#dashboard_div').hide();
+					$('#task_div').hide();
+					$('#alltask_overdue').hide();
+					$('#mytask_overdue').prepend("<h2>My Overdue Tasks</h2>");
+					$('#mytask_overdue').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score");
+					jQuery.each(myoverdueTasks, function(i,task) {
+						$('#mytask_overdue').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.points+'</li></td></tr>');
+						$('#mytask_overdue').show();
+				});
+			});
+			});
+
 
 
 			/* displays the points earned by user and points needed by him to do fair share of work,
