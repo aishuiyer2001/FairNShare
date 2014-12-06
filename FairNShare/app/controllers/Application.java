@@ -77,7 +77,6 @@ import static play.libs.Json.toJson;
 		}
 		else{
 			recurring_countNumber = Integer.parseInt(recurring_count);
-		
 		}
 	
 		
