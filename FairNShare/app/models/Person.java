@@ -24,10 +24,10 @@ public class Person extends Model {
 
 	@Required
 	private int score;
-	
+
 	@DateTime(pattern = "mm/dd/yyyy")
 	private String dob;
-	
+
 
 	private String ph_no;
 	private Character gender;
@@ -37,7 +37,9 @@ public class Person extends Model {
 
 	public Person() {
 		this.score=0;
-		
+		this.dob=null;
+		this.gender=null;
+		this.ph_no=null;
 	}
 
 	public String getEmail() {
@@ -69,7 +71,8 @@ public class Person extends Model {
 	}
 
 	public void setDob(String dob) {
-		this.dob = dob;
+		if(dob.length()>0)
+			this.dob = dob;
 	}
 
 	public Character getGender() {
@@ -87,14 +90,15 @@ public class Person extends Model {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
+
 
 	public String getPh_no() {
 		return ph_no;
 	}
 
 	public void setPh_no(String ph_no) {
-		this.ph_no = ph_no;
+		if(ph_no.length()>0)
+			this.ph_no = ph_no;
 	}
 
 	public int getScore() {

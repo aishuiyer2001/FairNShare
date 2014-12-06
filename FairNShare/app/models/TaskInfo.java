@@ -10,30 +10,53 @@ import play.data.validation.Constraints.Required;
 import play.db.ebean.Model;
 @SuppressWarnings("serial")
 @Entity
-public class TaskInfo extends Model{
+public class TaskInfo extends Model
+{
 
 	@Id
 	private long taskID;
-	
+
 	@Required(message = "validation.required.emphasis")
 	private String title;
-	
+
 	private String description;
-	
+
 	private String createdBy;
-	
+
 	@ManyToOne
 	@Email
-	@Required(message = "validation.required.emphasis")
 	@JoinColumn(name = "emailAssignedTo", referencedColumnName = "email")
 	private String emailAssignedTo;
-	
+
 	@Required
 	private boolean done;
-	
+
 	private boolean recurring_status;
-	
-	
+
+	//@DateTime(pattern = "mm/dd/yyyy hh:mm")
+	private String startDate;
+
+
+	//@DateTime(pattern = "mm/dd/yyyy hh:mm")
+	private String endDate;
+
+	@Required
+	private int oldPoints;
+
+	@Required
+	private int newPoints;
+
+
+
+	public TaskInfo()
+	{
+		this.done=false;
+		this.recurring_status=false;
+		this.startDate=null;
+		this.endDate=null;
+		this.emailAssignedTo=null;
+	}
+
 	public boolean isRecurring_status() {
 		return recurring_status;
 	}
@@ -42,15 +65,23 @@ public class TaskInfo extends Model{
 		this.recurring_status = recurring_status;
 	}
 
-	public TaskInfo()
-	{
-	this.done=false;
-	this.points=0;
+	public int getOldPoints() {
+		return oldPoints;
 	}
-	
-	
-	
-	 public long getTaskID() {
+
+	public void setOldPoints(int oldPoints) {
+		this.oldPoints = oldPoints;
+	}
+
+	public int getnewPoints() {
+		return newPoints;
+	}
+
+	public void setNewPoints(int newPoints) {
+		this.newPoints = newPoints;
+	}
+
+	public long getTaskID() {
 		return taskID;
 	}
 
@@ -79,7 +110,8 @@ public class TaskInfo extends Model{
 	}
 
 	public void setEmailAssignedTo(String emailAssignedTo) {
-		this.emailAssignedTo = emailAssignedTo;
+		if(emailAssignedTo!=null && emailAssignedTo.length()>0)
+			this.emailAssignedTo = emailAssignedTo;
 	}
 
 	public boolean getDone() {
@@ -95,7 +127,8 @@ public class TaskInfo extends Model{
 	}
 
 	public void setStartDate(String startDate) {
-		this.startDate = startDate;
+		if(startDate.length()>0)
+			this.startDate = startDate;
 	}
 
 	public String getEndDate() {
@@ -103,16 +136,11 @@ public class TaskInfo extends Model{
 	}
 
 	public void setEndDate(String endDate) {
-		this.endDate = endDate;
+		if(endDate.length()>0)
+			this.endDate = endDate;
 	}
 
-	public int getPoints() {
-		return points;
-	}
 
-	public void setPoints(int points) {
-		this.points = points;
-	}
 
 	public String getCreatedBy() {
 		return createdBy;
@@ -122,14 +150,6 @@ public class TaskInfo extends Model{
 		this.createdBy = createdBy;
 	}
 
-	@Required(message = "validation.required.emphasis")
-	//@DateTime(pattern = "mm/dd/yyyy hh:mm")
-	private String startDate;
-	
-	@Required(message = "validation.required.emphasis")
-	//@DateTime(pattern = "mm/dd/yyyy hh:mm")
-	private String endDate;
-	
-	@Required
-	private int points;
+
+
 }
