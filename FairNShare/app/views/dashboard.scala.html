@@ -35,11 +35,10 @@
 					<ul class="nav nav-second-level">
 						<li><a id="task-page" style="cursor:hand;">All Tasks</a></li>
 						<li><a id="mytask-page" style="cursor:hand;">My Tasks</a></li>
-						<li><a id="myRecurringtask-page" style="cursor:hand;">My Recurring Tasks</a></li>
+						<li><a id="myrecurringtask-page" style="cursor:hand;">My Recurring Tasks</a></li>
 						<li><a id="incomplete-page" style="cursor:hand;">Incomplete Tasks</a></li>
-						<li><a data-toggle="modal" data-target="#myModal" style="cursor:hand;">Add
-								Tasks</a></li>
-						<li><a style="cursor:hand;">Manage Tasks</a></li>
+						<li><a id="resuabletask-page" style="cursor:hand;">Re-usable Tasks</a></li>
+						<li><a data-toggle="modal" data-target="#myModal" style="cursor:hand;">Add Tasks</a></li>
 					</ul> <!-- /.nav-second-level --></li>
 				<li><a href="#" style="cursor:hand;"><i class="fa  fa-smile-o"></i>&nbsp
 						&nbspFriends<span class="fa arrow"></span></a>
@@ -87,6 +86,10 @@
 	id="task_incomplete">
 	<ul id="incompleteTasks"></ul>
 </div>
+<div class="pos" style="padding-left: 150px; right: 350px;"
+	id="task_reusable">
+	<ul id="reUsableTasks"></ul>
+</div>
 
 <div class="pos" style="padding-left: 150px; right: 350px;"
 	id="task_recurring">
@@ -116,6 +119,7 @@
 <button id="showMyTasks" class="btn btn-success">Show My Tasks</button>
 
 
+
 <!-- End of id references for various elements in the code-->
 
 <!-- Beginning the Modal for Add Task function -->
@@ -127,7 +131,7 @@
 				<button type="button" class="close" data-dismiss="modal">
 					<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
 				</button>
-				<h4 class="modal-title" id="myModalLabel">Create a new Task</h4>
+				<h4 class="modal-title" id="myModalLabel">Create a Reusable Task</h4>
 			</div>
 			<div class="modal-body">
 				<form role="form" action="@routes.Application.createTask()"
@@ -159,7 +163,7 @@
 					</div>
 					<div class="form-group">
 						<label for="points">Points for the task:</label>
-						<input type="number" name="points" id="points" min="5" max="100" step="5"
+						<input type="number" name="newPoints" id="newPoints" min="5" max="100" step="5"
 							class="form-control input-lg" placeholder="0" tabindex="4"
 							required>
 					</div>
@@ -228,5 +232,121 @@
 	</div>
 </div>
 <!-- End of Modal -->
+
+<!-- End of id references for various elements in the code-->
+
+<!-- Beginning the Modal for Reuse Task function -->
+<div class="modal fade" id="myModal2" tabindex="-1" role="dialog"
+	aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">
+					<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">Create a new Task</h4>
+			</div>
+			<div class="modal-body">
+				<form role="form" action="@routes.Application.createTask()"
+					method="POST">
+					<div class="row">
+
+						<div class="col-xs-12 col-sm-6 col-md-6">
+							<div class="form-group">
+								<label for="name">Task Name:</label>
+								<div id="taskname"></div>
+							</div>
+						</div>
+						<div class="col-xs-12 col-sm-6 col-md-6">
+							<div class="form-group">
+								<label for="description">Description:</label>
+								<div id="description"></div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="form-group">
+						<label for="points">Points for the task:</label>
+						<div id="points"></div>
+					</div>
+					
+					<div class="form-group">
+						<label for="email">Email:</label>
+						<input type="email" name="emailAssignedTo" id="emailAssignedTo"
+							class="form-control input-lg" placeholder="Email"
+							tabindex="3">
+					</div>
+					
+					<div class="row">
+						<div class="col-xs-12 col-sm-6 col-md-6">
+							<div class="form-group">
+								<label for="start date">Start Date:</label>
+								<input type="date" name="startDate" id="startDate"
+									class="form-control input-lg" placeholder="start date"
+									tabindex="5" required>
+							</div>
+						</div>
+						<div class="col-xs-12 col-sm-6 col-md-6">
+							<div class="form-group">
+								<label for="end date">End Date:</label>
+								<input type="date" name="endDate" id="endDate"
+									class="form-control input-lg" placeholder="end date"
+									tabindex="6" required>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+ 						<div class="col-xs-12 col-sm-7 col-md-3">
+ 							<div class="form-group">
+ 								<div class="input-lg" border=0>Recurring Task?
+ 								</div>
+ 							</div>
+ 						</div>
+ 						
+ 						<div class="col-xs-1 col-sm-1 col-md-1">
+ 							<div class="form-group">
+ 								<input type="checkbox" name="recurring_status" id="recurring_status"
+ 									class="form-control input-lg"
+ 									tabindex="7">
+ 							</div>
+ 						</div>
+ 						
+ 						<div class="col-xs-6 col-sm-3 col-md-2"></div>
+ 						
+ 						<div class="col-xs-6 col-sm-3 col-md-6">
+ 							<div class="form-group">
+ 								<select name="recurring_type"
+ 									id="recurring_type" class="form-control input-lg">
+ 									<option value="weekly">Weekly</option>
+ 									<option value="monthly">Monthly</option>
+ 								</select>
+ 
+ 							</div>
+ 						</div>
+ 						</div>
+ 						<div class="row">
+ 						<div class="col-xs-12 col-sm-7 col-md-6">
+  							<div class="form-group" >
+ 								<label for="No of tasks">No of times the task should recur:</label><input type="text"
+ 									name="taskCount" id="taskCount" class="form-control input-lg"
+ 									placeholder="1" tabindex="8">
+  							</div>
+  						</div>
+ 					</div>
+					<button type="submit" class="btn btn-success">Create Task</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</form>
+			  </div>
+			<div class="modal-footer"></div>
+		</div>
+	</div>
+</div>
+<!-- End of Modal -->
+<!-- End of dashboard render -->
+
+
+
+
+
 <!-- End of dashboard render -->
 }

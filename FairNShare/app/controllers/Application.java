@@ -89,6 +89,7 @@ import static play.libs.Json.toJson;
 			String usermail = session("connectedmail"); // Get the user mail from session and set it to the created field in db
 			newTask.setCreatedBy(usermail);
 			newTask.save();
+			//return ok(toJson(newTask));	
 
 		}
 
@@ -231,15 +232,67 @@ import static play.libs.Json.toJson;
 		//TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
 		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
 		
+		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();
+		
+		//TaskInfo pointsList = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(existingTask.getnewPoints());
+		
+		int sumOfAllTasks = 0;
+		int noOfTasks= tasks.size();
+		//int i= tasks.newPoints(i);
+		for(TaskInfo t: tasks)
+		{
+			sumOfAllTasks = sumOfAllTasks + t.getnewPoints();
+		}
+		
+		
+		
 		System.out.println("taskID"+taskID);
 		String usermail = session("connectedmail"); 							//getting the current email session of the user
 		existingTask.setEmailAssignedTo(usermail);								//changing the email task assigned to, to the current user
-		existingTask.save();													//saving the entry for the task in database
+		
+		double chosenTaskPoints = existingTask.getnewPoints();
+		
+		double sumOfUnchosenTasks = sumOfAllTasks - chosenTaskPoints;
+		double totalDelta=(double) (chosenTaskPoints * 0.2);
+		double individualDeltaForTaskX =totalDelta/(sumOfUnchosenTasks);
+		double newPointValueofChosenTask = chosenTaskPoints-totalDelta;
+		
+		for(TaskInfo t: tasks)
+		{	
+			int x=t.getnewPoints();
+			double newPointValueofUnchosenTask=individualDeltaForTaskX *x+x;
+			long id= t.getTaskID();
+			long l=Long.parseLong(taskID);
+			if(id!=l)
+			{
+				TaskInfo currentTask= (TaskInfo) new Model.Finder(String.class,Person.class).byId(l);
+				return ok(toJson(newPointValueofUnchosenTask));
+				//currentTask.setNewPoints(1);
+				
+				
+			}
+			
+			
+		}
+		
+		
 
-		return ok(views.html.dashboard.render(""));
+		
+		return ok(toJson(newPointValueofChosenTask)); 
+		
+		//return ok(toJson(existingTask));	
+		
+		//existingTask.save();													//saving the entry for the task in database
+
+		//return ok(views.html.dashboard.render(""));
 	}
 
-
+	public static Result autoAdjust(String taskID) {
+		
+		
+		return ok();
+		
+	}
 
 	/*
 	 * Gives the points needed by a user to be doing fair share of work
@@ -314,9 +367,39 @@ import static play.libs.Json.toJson;
 		//we get the user email id who is assigned to the task
 		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));		//we extract the user based on the email id obtained above
 		int currentscore = currentUser.getScore();						//the already present score of the user the taken into currentscore by using getter
-		currentUser.setScore(existingTask.getPoints()+currentscore);	//now, the score of user is set to current score+ points of the task which he has done
+		currentUser.setScore(existingTask.getnewPoints()+currentscore);	//now, the score of user is set to current score+ points of the task which he has done
 		currentUser.save();
 		return ok(views.html.dashboard.render(""));
+		}
+	
+	
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	
+	
+	public static Result reusetaskUpdate(String taskID){											
+
+		//Method incomplete and left for further implementation as it was decided to take up by the other person earlier
+		
+		
+		//TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
+		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
+		System.out.println("title : "+existingTask.getTitle()+ existingTask.getDone());
+		//existingTask.setDone(true);
+		System.out.println("title : "+existingTask.getTitle()+ existingTask.getDone());
+		
+		return ok(toJson("existingTask"));	
+		
+		/*
+		existingTask.save();
+		//for that particular task, we change in the database that the task is done
+		//we get the user email id who is assigned to the task
+		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));		//we extract the user based on the email id obtained above
+		int currentscore = currentUser.getScore();						//the already present score of the user the taken into currentscore by using getter
+		currentUser.setScore(existingTask.getnewPoints()+currentscore);	//now, the score of user is set to current score+ points of the task which he has done
+		currentUser.save();
+		return ok(views.html.dashboard.render(""));
+		*/
 		}
 	
 
@@ -334,9 +417,22 @@ import static play.libs.Json.toJson;
 
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	
+	
+	public static Result showReUsableTasks()	{    									//to show incomplete tasks out of the whole list of tasks
+		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();  		//list with all the tasks
+		List<TaskInfo> reUsableTasks = new ArrayList<TaskInfo>();  					 //empty list taken as array for purpose
+		for(TaskInfo eachTask : Tasks)  																//for each task in the list of all tasks,
+		//if(!eachTask.getDone() &&  !eachTask.getEmailAssignedTo().equalsIgnoreCase(session("connectedmail")))			//if the status of the task is not done,
+		reUsableTasks.add(eachTask);											    	//that task is added to the incompleteTasks list
+		return ok(toJson(reUsableTasks));										//the incompleteTasks list with all the tasks in a list is sent as Json Object
+		//return ok(toJson("Tasks"));										//the incompleteTasks list with all the tasks in a list is sent as Json Object
+
+	}
+	
+	
 	@SuppressWarnings("unchecked")
-	
-	
 	
 			
 	public static Result checkPerson() {																//check if the person exists in the database or not
