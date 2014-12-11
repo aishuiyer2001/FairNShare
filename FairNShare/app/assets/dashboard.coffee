@@ -26,6 +26,8 @@ $ ->
          $('#task_incomplete').hide()
          $('#dashboard_div').hide()
          $.each tasks,(index,task) ->
-            $('#task_div'). append $('<tr><td><li class="list-group-item"></td>').text task.title+" ---- "+task.emailAssignedTo+" ---- "+task.createdBy+" ---- "+task.startDate+" ---- "+task.endDate+" ---- "+task.oldPoints 
+
+            $('#task_div'). append $('<tr><td><li class="list-group-item"></td>').text task.title+" ---- "+task.emailAssignedTo+" ---- "+task.createdBy+" ---- "+task.startDate+" ---- "+task.endDate+" ---- "+task.newPoints 
+
             ))
   

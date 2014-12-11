@@ -210,6 +210,7 @@ public class Application extends Controller {
 			newTask.setCreatedBy(usermail);
 			newTask.setNewPoints(Integer.parseInt(requestData.get("oldPoints")));
 			newTask.save();
+			//return ok(toJson(newTask));	
 
 		}
 
@@ -330,8 +331,6 @@ public class Application extends Controller {
 
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-
 
 	public static Result showMyTasks(){  													//method to show only user tasks in the system, i.e, only tasks assigned to the particular user
 		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();			//extracting all tasks from the ddatabase into a list
@@ -355,15 +354,116 @@ public class Application extends Controller {
 		//TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
 		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
 
+		TaskInfo allTasks = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
+		
+		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();
+		
+		for(TaskInfo t: tasks)
+		{   
+			double points=allTasks.getnewPoints();
+			allTasks.setOldPoints(points);
+		}
+		
+		
+		//TaskInfo pointsList = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(existingTask.getnewPoints());
+		existingTask.setAssigned(true);
+		existingTask.save();
+		
+		double sumOfAllUnassignedTasks = 0;
+		int noOfTasks= tasks.size();
+		
+		for(TaskInfo t: tasks)
+		{   
+			if(t.getAssigned())
+			{
+				
+			}
+			else
+			{
+			sumOfAllUnassignedTasks = sumOfAllUnassignedTasks + t.getnewPoints();
+			}
+		}
+		
+		
 		System.out.println("taskID"+taskID);
 		String usermail = session("connectedmail"); 							//getting the current email session of the user
 		existingTask.setEmailAssignedTo(usermail);								//changing the email task assigned to, to the current user
-		existingTask.save();													//saving the entry for the task in database
+		
+		double chosenTaskPoints = existingTask.getnewPoints();
+		
+		double sumOfUnchosenTasks = sumOfAllUnassignedTasks - chosenTaskPoints;
+		double totalDelta=(double) (chosenTaskPoints * 0.2);
+		
+		double individualDeltaForTaskX =totalDelta/(sumOfUnchosenTasks);
+		double newPointValueofChosenTask = chosenTaskPoints-totalDelta;
+		
+		existingTask.setNewPoints(newPointValueofChosenTask);
+		existingTask.save();	
+		
+		
+		for(TaskInfo t: tasks)
+		{	
+			
+			long idOfList= t.getTaskID();
+			int idOfList1 = (int)idOfList;
+			//long l=Long.parseLong(taskID);
+			long idOfselectedTask=Integer.parseInt(taskID);
+			
+			//return ok(toJson(l));
+			
+			if(idOfList1 != idOfselectedTask)
+			{
+			
+				TaskInfo cTask= (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(idOfList1);
+				
+				if(cTask.getAssigned())
+				{
+					
+				}
+				else
+				{
+					double x=cTask.getnewPoints();
+					double newPointValueofUnchosenTask=(x/sumOfUnchosenTasks)*totalDelta;
+					
+					
+					double y=newPointValueofUnchosenTask+x;
+					//double newPointValueofUnchosenTask=x+totalDelta *x;
+					//return ok(toJson(y));
+					//return ok(toJson(cTask.getTitle()));
+	
+		
+					cTask.setNewPoints(y);
+					cTask.save();	
+				}
+				
+			}
+			
+		
+			
+		}
+		
+		
+		
+		
+		//return ok(toJson(newPointValueofChosenTask)); 
+		
+		//return ok(toJson(existingTask));	
+		
+		//existingTask.save();													//saving the entry for the task in database
 
-		return ok(views.html.dashboard.render(""));
+		//return ok(views.html.dashboard.render(""));
+		 
+		return ok();
+
+		
+}
+
+	public static Result autoAdjust(String taskID) {
+		
+		
+		return ok();
+		
 	}
-
-
 
 	/*
 	 * Gives the points needed by a user to be doing fair share of work
@@ -437,12 +537,42 @@ public class Application extends Controller {
 		//for that particular task, we change in the database that the task is done
 		//we get the user email id who is assigned to the task
 		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));		//we extract the user based on the email id obtained above
-		int currentscore = currentUser.getScore();						//the already present score of the user the taken into currentscore by using getter
+		double currentscore = currentUser.getScore();						//the already present score of the user the taken into currentscore by using getter
 		currentUser.setScore(existingTask.getOldPoints()+currentscore);	//now, the score of user is set to current score+ points of the task which he has done
 		currentUser.save();
 		return ok(views.html.dashboard.render(""));
-	}
+		}
+	
+	
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	
+	
+	public static Result reusetaskUpdate(String taskID){											
 
+		//Method incomplete and left for further implementation as it was decided to take up by the other person earlier
+		
+		
+		//TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
+		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
+		System.out.println("title : "+existingTask.getTitle()+ existingTask.getDone());
+		//existingTask.setDone(true);
+		System.out.println("title : "+existingTask.getTitle()+ existingTask.getDone());
+		
+		return ok(toJson("existingTask"));	
+		
+		/*
+		existingTask.save();
+		//for that particular task, we change in the database that the task is done
+		//we get the user email id who is assigned to the task
+		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));		//we extract the user based on the email id obtained above
+		int currentscore = currentUser.getScore();						//the already present score of the user the taken into currentscore by using getter
+		currentUser.setScore(existingTask.getnewPoints()+currentscore);	//now, the score of user is set to current score+ points of the task which he has done
+		currentUser.save();
+		return ok(views.html.dashboard.render(""));
+		*/
+		}
+	
 
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -458,11 +588,26 @@ public class Application extends Controller {
 
 	}
 
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	
+	
+	public static Result showReUsableTasks()	{    									//to show incomplete tasks out of the whole list of tasks
+		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();  		//list with all the tasks
+		List<TaskInfo> reUsableTasks = new ArrayList<TaskInfo>();  					 //empty list taken as array for purpose
+		for(TaskInfo eachTask : Tasks)  																//for each task in the list of all tasks,
+		//if(!eachTask.getDone() &&  !eachTask.getEmailAssignedTo().equalsIgnoreCase(session("connectedmail")))			//if the status of the task is not done,
+		reUsableTasks.add(eachTask);											    	//that task is added to the incompleteTasks list
+		return ok(toJson(reUsableTasks));										//the incompleteTasks list with all the tasks in a list is sent as Json Object
+		//return ok(toJson("Tasks"));										//the incompleteTasks list with all the tasks in a list is sent as Json Object
+
+	}
+	
+	
+	
 	@SuppressWarnings("unchecked")
-
-
-
-
+	
+			
 	public static Result checkPerson() {																//check if the person exists in the database or not
 		Login loginInfo=Form.form(Login.class).bindFromRequest().get();		
 		@SuppressWarnings("rawtypes")

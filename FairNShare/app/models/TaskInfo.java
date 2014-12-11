@@ -30,6 +30,8 @@ public class TaskInfo extends Model
 
 	@Required
 	private boolean done;
+	
+	private boolean assigned;
 
 	private boolean recurring_status;
 
@@ -41,16 +43,17 @@ public class TaskInfo extends Model
 	private String endDate;
 
 	@Required
-	private int oldPoints;
+	private double oldPoints;
 
 	@Required
-	private int newPoints;
+	private double newPoints;
 
 
 
 	public TaskInfo()
 	{
 		this.done=false;
+		this.assigned=false;
 		this.recurring_status=false;
 		this.startDate=null;
 		this.endDate=null;
@@ -65,19 +68,19 @@ public class TaskInfo extends Model
 		this.recurring_status = recurring_status;
 	}
 
-	public int getOldPoints() {
+	public double getOldPoints() {
 		return oldPoints;
 	}
 
-	public void setOldPoints(int oldPoints) {
+	public void setOldPoints(double oldPoints) {
 		this.oldPoints = oldPoints;
 	}
 
-	public int getnewPoints() {
+	public double getnewPoints() {
 		return newPoints;
 	}
 
-	public void setNewPoints(int newPoints) {
+	public void setNewPoints(double newPoints) {
 		this.newPoints = newPoints;
 	}
 
@@ -118,8 +121,14 @@ public class TaskInfo extends Model
 		return done;
 	}
 
+	public boolean getAssigned() {
+		return assigned;
+	}
 	public void setDone(boolean status) {
 		this.done = status;
+	}
+	public void setAssigned(boolean status) {
+		this.assigned = status;
 	}
 
 	public String getStartDate() {

@@ -1,5 +1,0 @@
-FairNShare
-==========
-
-first commit
-

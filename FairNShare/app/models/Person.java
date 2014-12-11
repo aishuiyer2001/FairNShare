@@ -23,7 +23,7 @@ public class Person extends Model {
 
 
 	@Required
-	private int score;
+	private double score;
 
 	@DateTime(pattern = "mm/dd/yyyy")
 	private String dob;
@@ -36,7 +36,7 @@ public class Person extends Model {
 	private String password;
 
 	public Person() {
-		this.score=0;
+		this.score=0.0;
 		this.dob=null;
 		this.gender=null;
 		this.ph_no=null;
@@ -101,11 +101,11 @@ public class Person extends Model {
 			this.ph_no = ph_no;
 	}
 
-	public int getScore() {
+	public double getScore() {
 		return score;
 	}
 
-	public void setScore(int score) {
+	public void setScore(double score) {
 		this.score = score;
 	}
 }
