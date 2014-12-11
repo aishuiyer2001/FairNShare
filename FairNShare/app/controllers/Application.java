@@ -57,6 +57,16 @@ import static play.libs.Json.toJson;
 		return ok(views.html.dashboard.render("Welcome " + user));
 	}
 	
+	public static Result calendar()
+	{
+		return ok(calendar.render("CALENDAR"));
+	}
+	
+	public static Result changeCalendar(){
+		
+		return ok(views.html.dashboard.render("Welcome "));
+	}
+		
 	public static Result addPerson() {
 
 		Person person=Form.form(Person.class).bindFromRequest().get();
@@ -65,16 +75,19 @@ import static play.libs.Json.toJson;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static Result createTask() {
+	public static Result createTask() throws Exception {
 
 		TaskInfo newTask = Form.form(TaskInfo.class).bindFromRequest().get();
 	
-
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		DynamicForm requestData = Form.form().bindFromRequest();
 		String recurring_type = requestData.get("recurring_type");
 		int recurring_countNumber;
 		String recurring_count = requestData.get("taskCount");
-	
+		String ending_in = requestData.get("enddays");
+		System.out.println("enddays"+ending_in);
+			int days = Integer.parseInt(ending_in);
+		
 		
 		if(recurring_count.equals("")){
 	
@@ -91,14 +104,8 @@ import static play.libs.Json.toJson;
 		Person assignedToEmailFound = (Person) new Model.Finder(String.class,
 				Person.class).byId(newTask.getEmailAssignedTo());
 
-		if (assignedToEmailFound != null
-				&& assignedToEmailFound.getEmail().equals(
-						newTask.getEmailAssignedTo())) {
-			String usermail = session("connectedmail"); // Get the user mail from session and set it to the created field in db
-			newTask.setCreatedBy(usermail);
-			newTask.save();
-
-		}
+		String usermail = session("connectedmail");					//Get the user mail from session and set it to the created field in db
+ 		newTask.setCreatedBy(usermail);
 
 		
 		 //Check if the task is recurring and add it into db based on weekly or monthly basis with number of tasks to be added given by user
@@ -133,7 +140,22 @@ import static play.libs.Json.toJson;
 						newTask.getEmailAssignedTo())) {
 			newTask.save();
 		}
-
+		
+		Date start_date = dateFormat.parse(newTask.getStartDate());  //get the starting date
+		Calendar c = Calendar.getInstance();
+		c.setTime(start_date);
+		
+		if(newTask.getEndDate()==null && days>0)		//if the number of days are specified
+		{
+			c.add(Calendar.DATE, days);		//add the number of days to the start date of the task
+			String end = dateFormat.format(c.getTime());
+			newTask.setEndDate(end);		//set the added date as the end date for the task
+			newTask.save();
+		}  
+		else
+			newTask.save();
+	
+		
 		return ok(views.html.dashboard.render(""));
 
 	}
@@ -207,6 +229,7 @@ import static play.libs.Json.toJson;
 	
 
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Result showMyRecurringTasks(){
 		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();  		//list with all the tasks
 		List<TaskInfo> myRecurringTasks = new ArrayList<TaskInfo>();  					 //empty list taken as array for purpose
@@ -228,6 +251,21 @@ import static play.libs.Json.toJson;
 		for(TaskInfo eachTask:tasks)														//for each task in the list of tasks
 		{	
 			if(eachTask.getEmailAssignedTo().equalsIgnoreCase(currentUser.getEmail()))		//the email to which the task is assigned is checked with the current session email
+				myTasks.add(eachTask);														//if they are equal, the task is added to the mist myTasks
+		}
+		return ok(toJson(myTasks));															//list myTasks is sent as a json object
+	}
+	
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static Result showMyIncompleteTasks(){  													//method to show only user tasks in the system, i.e, only tasks assigned to the particular user
+		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();			//extracting all tasks from the ddatabase into a list
+		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));
+		List<TaskInfo> myTasks = new ArrayList<TaskInfo>();									//creating an empty list of the type object TaskInfo
+		String usermail = session("connectedmail");											//getting the current session email of the current user
+		for(TaskInfo eachTask:tasks)														//for each task in the list of tasks
+		{	
+			if(eachTask.getEmailAssignedTo().equalsIgnoreCase(currentUser.getEmail()) && eachTask.getDone()==false)		//the email to which the task is assigned is checked with the current session email
 				myTasks.add(eachTask);														//if they are equal, the task is added to the mist myTasks
 		}
 		return ok(toJson(myTasks));															//list myTasks is sent as a json object
@@ -262,12 +300,14 @@ import static play.libs.Json.toJson;
 	 * then the difference is rounded to 0 and displayed (indicating that he has done fair share of work)
 	 */ 
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Result getPointsToComplete()  {
 		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));	// get current user from session
 		double earnedPoints = currentUser.getScore();					//get points earned by him until now
 		double pointsToComplete=0;										
 
 		// get a list of other roommates by getting all the roommates and removing the currently logged in user from the list
+		//@SuppressWarnings()
 		List<Person> otherUsers= new Model.Finder(String.class,Person.class).all(); 	
 		otherUsers.remove(currentUser);				
 
@@ -322,7 +362,7 @@ import static play.libs.Json.toJson;
 		//we get the user email id who is assigned to the task
 		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));		//we extract the user based on the email id obtained above
 		int currentscore = currentUser.getScore();						//the already present score of the user the taken into currentscore by using getter
-		currentUser.setScore(existingTask.getPoints()+currentscore);	//now, the score of user is set to current score+ points of the task which he has done
+		currentUser.setScore(existingTask.getnewPoints()+currentscore);	//now, the score of user is set to current score+ points of the task which he has done
 		currentUser.save();
 		return ok(views.html.dashboard.render(""));
 		}
@@ -336,14 +376,14 @@ import static play.libs.Json.toJson;
 		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();  		//list with all the tasks
 		List<TaskInfo> incompleteTasks = new ArrayList<TaskInfo>();  					 //empty list taken as array for purpose
 		for(TaskInfo eachTask : Tasks)  																//for each task in the list of all tasks,
-		if(!eachTask.getDone() &&  !eachTask.getEmailAssignedTo().equalsIgnoreCase(session("connectedmail")))			//if the status of the task is not done,
+		if(eachTask.getDone()==false &&  !eachTask.getEmailAssignedTo().equalsIgnoreCase(session("connectedmail")))			//if the status of the task is not done,
 			incompleteTasks.add(eachTask);											    	//that task is added to the incompleteTasks list
 		
 		return ok(toJson(incompleteTasks));										//the incompleteTasks list with all the tasks in a list is sent as Json Object
 
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	
 	public static Result showAllOverdueTasks() throws ParseException	{
 		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();			//taking list of all existing tasks
@@ -352,14 +392,15 @@ import static play.libs.Json.toJson;
 		Date date1 = new Date();	//a new Date object gives us the current system time
 		String enddate_string;	//string to take end date in
 		for(TaskInfo eachTask : Tasks){			//for each task in the list of tasks
-			enddate_string = eachTask.getEndDate();		//getting the end date of the task
+			enddate_string = eachTask.getEndDate();	//getting the end date of the task
 			Date date2 = dateFormat.parse(enddate_string);		//converting the end date string into required date format
-			if(date1.after(date2))			//if currrent date is after the end date of tasks
+			if(date1.after(date2) && eachTask.getDone()==false)			//if currrent date is after the end date of tasks
 				overdueTasks.add(eachTask);		//add that task to list of overdue tasks
 		}
 		return ok(toJson(overdueTasks));		//return overdue tasks
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Result showMyOverdueTasks() throws ParseException	{
 		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();			//taking list of all existing tasks
 		List<TaskInfo> overdueTasks = new ArrayList<TaskInfo>();		//a new list to add each overdue task to
@@ -371,7 +412,7 @@ import static play.libs.Json.toJson;
 		for(TaskInfo eachTask : Tasks){			//for each task in the list of tasks
 			enddate_string = eachTask.getEndDate();		//getting the end date of the task
 			Date date2 = dateFormat.parse(enddate_string);		//converting the end date string into required date format
-			if(date1.after(date2) && eachTask.getEmailAssignedTo().equalsIgnoreCase(currentUser.getEmail()))			//if currrent date is after the end date of tasks
+			if(date1.after(date2) && eachTask.getEmailAssignedTo().equalsIgnoreCase(currentUser.getEmail())  && eachTask.getDone()==false)			//if currrent date is after the end date of tasks
 				overdueTasks.add(eachTask);		//add that task to list of overdue tasks
 				//the email to which the task is assigned is checked with the current session email
 				//if they are equal, the task is added to the list of the user's overdue tasks
@@ -379,6 +420,7 @@ import static play.libs.Json.toJson;
 		return ok(toJson(overdueTasks));		//return overdue tasks
 	}
 			
+	@SuppressWarnings("unchecked")
 	public static Result checkPerson() {																//check if the person exists in the database or not
 		Login loginInfo=Form.form(Login.class).bindFromRequest().get();		
 		@SuppressWarnings("rawtypes")
@@ -438,5 +480,8 @@ import static play.libs.Json.toJson;
 		public void setTaskID(String taskID) {
 			this.taskID = taskID;
 		}
+		
+		
+		
 	
 }}

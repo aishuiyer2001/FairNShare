@@ -1,7 +1,5 @@
 
 
-import java.util.List;
-
 import models.Person;
 import models.TaskInfo;
 import static org.junit.Assert.*;
@@ -53,13 +51,15 @@ public class ApplicationTest {
 
     //Unit tests to check whether routing to html templates through URL's is being done properly or not
     
-    @Test
+    @SuppressWarnings("deprecation")
+	@Test
     public void indexRouteTest() {                          //Unit test to check whether routing URL is loading properly or not
 		Result result = routeAndCall(fakeRequest(GET, "/"));//A fake request is sent to load index template
         assertThat(result).isNotNull();                     //Asserts that routing is successful and not null
     }
     
-    @Test
+    @SuppressWarnings("deprecation")
+	@Test
     public void dashboardRouteTest() {                      //Performs the same test as indexRouteTest for dashboard template
         Result result = routeAndCall(fakeRequest(GET, "/dashboard"));
         assertThat(result).isNotNull();

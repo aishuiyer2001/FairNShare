@@ -8,7 +8,10 @@ $ ->
          $('#mytask_div').hide()
          $('#task_recurring').hide()
          $('#userPoints').hide()
+         $('#myincompletetask_div').hide();
          $('#dashboard_div').hide()
+         $('#alltask_overdue').hide();
+         $('#mytask_overdue').hide();
          $('#task_incomplete').hide()  
          $.each friends,(index,friend) ->
             $('#friend_div').append $('<li class="list-group-item">').text friend.fname+" "+friend.lname
@@ -22,10 +25,13 @@ $ ->
          $('#friend_div').hide()
          $('#task_recurring').hide()
          $('#userPoints').hide()
+         $('#myincompletetask_div').hide();
          $('#mytask_div').hide()
          $('#task_incomplete').hide()
+         $('#alltask_overdue').hide();
+         $('#mytask_overdue').hide();
          $('#dashboard_div').hide()
          $.each tasks,(index,task) ->
-            $('#task_div'). append $('<tr><td><li class="list-group-item"></td>').text task.title+" ---- "+task.emailAssignedTo+" ---- "+task.createdBy+" ---- "+task.startDate+" ---- "+task.endDate+" ---- "+task.points 
+            $('#task_div'). append $('<tr><td><li class="list-group-item"></td>').text task.title+" ---- "+task.emailAssignedTo+" ---- "+task.createdBy+" ---- "+task.startDate+" ---- "+task.endDate+" ---- "+task.newPoints 
             ))
   

@@ -34,7 +34,11 @@
 						&nbspTasks <span class="fa arrow"></span></a>
 					<ul class="nav nav-second-level">
 						<li><a id="task-page" style="cursor:hand;">All Tasks</a></li>
+						<li><a href="#">My Tasks<span class="fa arrow"></span></a>
+						<ul class="nav nav-second-level">
 						<li><a id="mytask-page" style="cursor:hand;">My Tasks</a></li>
+						<li><a id="myincompletetask-page" style="cursor:hand;">My Incomplete Tasks</a></li>
+						</ul> <!-- /.nav-second-level --></li>
 						<li><a id="myRecurringtask-page" style="cursor:hand;">My Recurring Tasks</a></li>
 						<li><a id="incomplete-page" style="cursor:hand;">Incomplete Tasks</a></li>
 						<li><a href="#">Overdue Tasks <span class="fa arrow"></span></a>
@@ -63,6 +67,8 @@
 					</ul></li>
 				<li><a href="#" id="notifications"><i class="fa fa-lightbulb-o"></i>&nbsp
 						&nbspNotifications</a></li>
+				<li><a href="@routes.Application.calendar()" id="notifications"><i class="fa fa-calendar"></i>&nbsp
+						&nbspCalendar</a></li>
 			</ul>
 		</div>
 		<!-- End of Menu Sidebar -->
@@ -83,6 +89,10 @@
 <div class="pos" style="padding-left: 150px; right: 350px;"
 	id="mytask_div">
 	<ul id="mytasks"></ul>
+</div>
+<div class="pos" style="padding-left: 150px; right: 350px;"
+	id="myincompletetask_div">
+	<ul id="myincompletetasks"></ul>
 </div>
 <div class="pos" style="padding-left: 150px; right: 350px;"
 	id="task_div">
@@ -118,19 +128,6 @@
 	id="task_div">
 	<a href="/logout" class="btn btn-primary" id="logout">LOGOUT</a>
 </div>
-
-<!--
-<ul id="friends"></ul>
-<button id="showFriends" class="btn btn-success">Show Friends</button>
-<ul id="tasks"></ul>
-<button id="showTasks" class="btn btn-success">Show All Tasks</button>
-<ul id="incompleTasks"></ul>
-<button id="showIncompleteTasks" class="btn btn-success">Show Incomplete Tasks</button>
-<ul id="mytasks"></ul>
-<button id="showMyTasks" class="btn btn-success">Show My Tasks</button>
-<ul id="incompleTasks"></ul>
-<button id="showIncompleteTasks" class="btn btn-success">Show Incomplete Tasks</button>
--->
 
 <!-- End of id references for various elements in the code-->
 
@@ -175,28 +172,38 @@
 					</div>
 					<div class="form-group">
 						<label for="points">Points for the task:</label>
-						<input type="number" name="points" id="points" min="5" max="100" step="5"
+						<input type="number" name="newPoints" id="newPoints" min="5" max="100" step="5"
 							class="form-control input-lg" placeholder="0" tabindex="4"
 							required>
 					</div>
-					<div class="row">
-						<div class="col-xs-12 col-sm-6 col-md-6">
+					
+						
 							<div class="form-group">
 								<label for="start date">Start Date:</label>
 								<input type="date" name="startDate" id="startDate"
 									class="form-control input-lg" placeholder="start date"
-									tabindex="5" required>
+									tabindex="5" required/>
 							</div>
-						</div>
-						<div class="col-xs-12 col-sm-6 col-md-6">
-							<div class="form-group">
-								<label for="end date">End Date:</label>
+						
+						<div class="form-group">
+						<table>	<tr><td>
+								<input type="radio" id="DateOption" name="date" value="date">
+								<label for="end date">End Date: 
 								<input type="date" name="endDate" id="endDate"
 									class="form-control input-lg" placeholder="end date"
-									tabindex="6" required>
-							</div>
+									tabindex="6" optional/>
+								</input>
+							</td> &nbsp; &nbsp;
+							<td>
+								<input type="radio" id="DaysOption" name="date" value="days">
+								<label for="end date">Days:
+								<input type="text" name="enddays" id="enddays"
+									class="form-control input-lg" placeholder="to be completed within"
+									tabindex="6" optional/>
+								</input>
+							</td></tr></table>
 						</div>
-					</div>
+						
 					<div class="row">
  						<div class="col-xs-12 col-sm-7 col-md-3">
  							<div class="form-group">
