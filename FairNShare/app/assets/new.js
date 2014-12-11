@@ -46,7 +46,7 @@ $(document).ready(
 					$('#mytask_div').append("<h2>My Tasks</h2>");
 					$('#mytask_div').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score");
 					jQuery.each(myTasks, function(i,task) {
-						$('#mytask_div').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.newPoints+' <form role="form" action="/personUpdate/'+task.taskID+'" method="POST"> <input type="submit" class="btn btn-success" id="mybutton" value="Done!"></input></form></li></td></tr>');
+						$('#mytask_div').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.oldPoints+' <form role="form" action="/personUpdate/'+task.taskID+'" method="POST"> <input type="submit" class="btn btn-success" id="mybutton" value="Done!"></input></form></li></td></tr>');
 						$('#mytask_div').show();
 				});
 			});

@@ -213,6 +213,9 @@ import static play.libs.Json.toJson;
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	
 	
+	
+	
+	
 	public static Result showMyTasks(){  													//method to show only user tasks in the system, i.e, only tasks assigned to the particular user
 		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();			//extracting all tasks from the ddatabase into a list
 		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));
@@ -231,19 +234,35 @@ import static play.libs.Json.toJson;
 	public static Result taskUpdate(String taskID) {											//method to update task which is incomplete, to assign it to the user himself
 		//TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
 		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
+		TaskInfo allTasks = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
 		
 		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();
 		
-		//TaskInfo pointsList = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(existingTask.getnewPoints());
-		
-		int sumOfAllTasks = 0;
-		int noOfTasks= tasks.size();
-		//int i= tasks.newPoints(i);
 		for(TaskInfo t: tasks)
-		{
-			sumOfAllTasks = sumOfAllTasks + t.getnewPoints();
+		{   
+			double points=allTasks.getnewPoints();
+			allTasks.setOldPoints(points);
 		}
 		
+		
+		//TaskInfo pointsList = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(existingTask.getnewPoints());
+		existingTask.setAssigned(true);
+		existingTask.save();
+		
+		double sumOfAllUnassignedTasks = 0;
+		int noOfTasks= tasks.size();
+		
+		for(TaskInfo t: tasks)
+		{   
+			if(t.getAssigned())
+			{
+				
+			}
+			else
+			{
+			sumOfAllUnassignedTasks = sumOfAllUnassignedTasks + t.getnewPoints();
+			}
+		}
 		
 		
 		System.out.println("taskID"+taskID);
@@ -252,40 +271,72 @@ import static play.libs.Json.toJson;
 		
 		double chosenTaskPoints = existingTask.getnewPoints();
 		
-		double sumOfUnchosenTasks = sumOfAllTasks - chosenTaskPoints;
+		double sumOfUnchosenTasks = sumOfAllUnassignedTasks - chosenTaskPoints;
 		double totalDelta=(double) (chosenTaskPoints * 0.2);
+		
 		double individualDeltaForTaskX =totalDelta/(sumOfUnchosenTasks);
 		double newPointValueofChosenTask = chosenTaskPoints-totalDelta;
 		
+		existingTask.setNewPoints(newPointValueofChosenTask);
+		existingTask.save();	
+		
+		
 		for(TaskInfo t: tasks)
 		{	
-			int x=t.getnewPoints();
-			double newPointValueofUnchosenTask=individualDeltaForTaskX *x+x;
-			long id= t.getTaskID();
-			long l=Long.parseLong(taskID);
-			if(id!=l)
+			
+			long idOfList= t.getTaskID();
+			int idOfList1 = (int)idOfList;
+			//long l=Long.parseLong(taskID);
+			long idOfselectedTask=Integer.parseInt(taskID);
+			
+			//return ok(toJson(l));
+			
+			if(idOfList1 != idOfselectedTask)
 			{
-				TaskInfo currentTask= (TaskInfo) new Model.Finder(String.class,Person.class).byId(l);
-				return ok(toJson(newPointValueofUnchosenTask));
-				//currentTask.setNewPoints(1);
+			
+				TaskInfo cTask= (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(idOfList1);
 				
+				if(cTask.getAssigned())
+				{
+					
+				}
+				else
+				{
+					double x=cTask.getnewPoints();
+					double newPointValueofUnchosenTask=(x/sumOfUnchosenTasks)*totalDelta;
+					
+					
+					double y=newPointValueofUnchosenTask+x;
+					//double newPointValueofUnchosenTask=x+totalDelta *x;
+					//return ok(toJson(y));
+					//return ok(toJson(cTask.getTitle()));
+	
+		
+					cTask.setNewPoints(y);
+					cTask.save();	
+				}
 				
 			}
 			
+		
 			
 		}
 		
 		
-
 		
-		return ok(toJson(newPointValueofChosenTask)); 
+		
+		//return ok(toJson(newPointValueofChosenTask)); 
 		
 		//return ok(toJson(existingTask));	
 		
 		//existingTask.save();													//saving the entry for the task in database
 
 		//return ok(views.html.dashboard.render(""));
-	}
+		 
+		return ok();
+
+		
+}
 
 	public static Result autoAdjust(String taskID) {
 		
@@ -366,8 +417,8 @@ import static play.libs.Json.toJson;
 		//for that particular task, we change in the database that the task is done
 		//we get the user email id who is assigned to the task
 		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));		//we extract the user based on the email id obtained above
-		int currentscore = currentUser.getScore();						//the already present score of the user the taken into currentscore by using getter
-		currentUser.setScore(existingTask.getnewPoints()+currentscore);	//now, the score of user is set to current score+ points of the task which he has done
+		double currentscore = currentUser.getScore();						//the already present score of the user the taken into currentscore by using getter
+		currentUser.setScore(existingTask.getOldPoints()+currentscore);	//now, the score of user is set to current score+ points of the task which he has done
 		currentUser.save();
 		return ok(views.html.dashboard.render(""));
 		}
@@ -430,6 +481,7 @@ import static play.libs.Json.toJson;
 		//return ok(toJson("Tasks"));										//the incompleteTasks list with all the tasks in a list is sent as Json Object
 
 	}
+	
 	
 	
 	@SuppressWarnings("unchecked")
