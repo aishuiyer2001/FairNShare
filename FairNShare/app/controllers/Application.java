@@ -1,5 +1,6 @@
 package controllers;
 import views.html.*;
+
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.text.ParseException;
@@ -8,12 +9,19 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import javax.swing.JButton;
+
 import org.h2.engine.User;
+
+import ch.qos.logback.core.joran.action.NewRuleAction;
 import ch.qos.logback.core.joran.action.ActionUtil.Scope;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sun.java.swing.plaf.windows.WindowsBorders.DashedBorder;
+
 import models.Person;
 import models.TaskInfo;
 import play.*;
@@ -25,31 +33,30 @@ import play.libs.Json;
 import play.mvc.*;
 import play.mvc.Http.Context;
 import play.mvc.Http.Session;
-
 import static play.libs.Json.toJson;
 
 @SuppressWarnings("unused")
-	public class Application extends Controller {
-	
+public class Application extends Controller {
+
 	public static Result index() {
 
 		return ok(index.render(""));
 	}
 
-	
+
 	public static Result loginFail() {
-		 
-		 		return ok(index.render("Login Fail"));
-		 	}
+
+		return ok(index.render("Login Fail"));
+	}
 
 	public static Result redirectDashBoardURL() {
 		String user = session("connected");
-		
+
 		if(user==null)
 			return redirect(routes.Application.index());
 		return ok(views.html.dashboard.render("Welcome " + user));
 	}
-	
+
 	public static Result addPerson() {
 
 		Person person=Form.form(Person.class).bindFromRequest().get();
@@ -57,45 +64,159 @@ import static play.libs.Json.toJson;
 		return ok(index.render("User Registered"));
 	}
 
+
+
+	public static Result createTask() throws ParseException
+	{
+		TaskInfo newTask = new TaskInfo();
+		DynamicForm requestData = Form.form().bindFromRequest();
+
+		newTask.setCreatedBy(session("connectedmail"));
+		newTask.setDescription(requestData.get("description"));
+
+		Person existingPerson = (Person) new Model.Finder(String.class,Person.class).byId(requestData.get("emailAssignedTo"));
+		if(!requestData.get("emailAssignedTo").equals("") && existingPerson!=null)
+			newTask.setEmailAssignedTo(requestData.get("emailAssignedTo"));
+		else if(!requestData.get("emailAssignedTo").equals("") && existingPerson==null)
+			return ok(views.html.dashboard.render("Task could not be created. Email to assign does not exist in the database"));
+
+		newTask.setStartDate(requestData.get("startDate"));
+		newTask.setEndDate(requestData.get("endDate"));
+		newTask.setOldPoints(Integer.parseInt(requestData.get("oldPoints")));
+		newTask.setNewPoints(Integer.parseInt(requestData.get("oldPoints")));
+		newTask.setTitle(requestData.get("title"));
+
+		if(!requestData.get("recurring_type").equals(""))
+		{
+			newTask.setRecurring_status(true);
+			if(newTask.getStartDate()!=null)
+				newTask.setEndDate(getEndDate(newTask.getStartDate(), requestData.get("recurring_type")));
+		}
+
+		List<TaskInfo> allTasks = new Model.Finder(String.class,TaskInfo.class).all();
+		boolean taskAlreadyExists = false;
+		for(TaskInfo task : allTasks)
+			if(task.getTitle().equalsIgnoreCase(newTask.getTitle()))
+				taskAlreadyExists=true;
+		if(!taskAlreadyExists)
+		{
+			newTask.save(); 	// only if newTask could be saved, proceed with next recurring
+
+			if(newTask.isRecurring_status())
+			{
+				int taskCount=0;
+				if(!requestData.get("taskCount").equals(""))
+					taskCount=Integer.parseInt(requestData.get("taskCount"));
+				if(taskCount>0)
+				{
+					TaskInfo newRecurringTask;
+					for(int i=0;i<taskCount-1;i++)
+					{
+
+						newRecurringTask = new TaskInfo();
+						newRecurringTask.setCreatedBy(newTask.getCreatedBy());
+						newRecurringTask.setDescription(newTask.getDescription());
+						newRecurringTask.setEmailAssignedTo(newTask.getEmailAssignedTo());
+						newRecurringTask.setNewPoints(newTask.getnewPoints());
+						newRecurringTask.setOldPoints(newTask.getOldPoints());
+						newRecurringTask.setTitle(newTask.getTitle());
+						newTask.setRecurring_status(true);
+						newRecurringTask.setRecurring_status(true);
+						if(newTask.getStartDate()!=null)
+						{	
+							newRecurringTask.setStartDate(getStartDate(newTask.getStartDate(),i+1,requestData.get("recurring_type")));
+							newRecurringTask.setEndDate(getEndDate(newRecurringTask.getStartDate(),requestData.get("recurring_type")));
+						}
+						newRecurringTask.save();
+					}
+				}
+			}
+
+			return ok(views.html.dashboard.render("Task Created !"));
+		}
+		
+		return ok(views.html.dashboard.render(""));
+	}
+
+
+	private static String getEndDate(String startDate, String recurringType) throws ParseException 
+	{
+
+		Calendar c = Calendar.getInstance();		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");	//Formatting from String to Date data type
+
+		Date date = sdf.parse(startDate);
+		c.setTime(date);
+
+		if(recurringType.equals("weekly"))
+			c.add(Calendar.DATE, 6);
+
+		else if(recurringType.equals("monthly"))
+			c.add(Calendar.DATE, 29);
+
+		return sdf.format(c.getTime());
+	}
+
+
+	private static String getStartDate(String startDate, int count, String recurringType) throws ParseException
+	{
+		Calendar c = Calendar.getInstance();		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");	//Formatting from String to Date data type
+
+		Date date = sdf.parse(startDate);
+		c.setTime(date);
+
+		if(recurringType.equals("weekly"))
+			c.add(Calendar.DATE, 7*count);
+
+		else if(recurringType.equals("monthly"))
+			c.add(Calendar.DATE, 30*count);
+
+		return sdf.format(c.getTime());
+
+	}
+
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static Result createTask() {
+	public static Result createTask1() {
 
-		TaskInfo newTask = Form.form(TaskInfo.class).bindFromRequest().get();
-	
+		//TaskInfo newTask = Form.form(TaskInfo.class).bindFromRequest().get();
 
+		TaskInfo newTask = new TaskInfo();
 		DynamicForm requestData = Form.form().bindFromRequest();
 		String recurring_type = requestData.get("recurring_type");
 		int recurring_countNumber;
 		String recurring_count = requestData.get("taskCount");
-	
-		
+
+
 		if(recurring_count.equals("")){
-	
+
 			recurring_count="1";
 			recurring_countNumber = Integer.parseInt(recurring_count);
-	
+
 		}
 		else{
 			recurring_countNumber = Integer.parseInt(recurring_count);
 		}
-	
-		
-		Person assignedToEmailFound = (Person) new Model.Finder(String.class,
-				Person.class).byId(newTask.getEmailAssignedTo());
 
-		if (assignedToEmailFound != null
+
+		Person assignedToEmailFound = (Person) new Model.Finder(String.class,
+				Person.class).byId(requestData.get("emailAssignedTo"));
+		System.out.println("here"+requestData.get("emailAssignedTo")+"--");
+		if ((requestData.get("emailAssignedTo")==null) || (assignedToEmailFound != null
 				&& assignedToEmailFound.getEmail().equals(
-						newTask.getEmailAssignedTo())) {
+						requestData.get("emailAssignedTo")))) {
 			String usermail = session("connectedmail"); // Get the user mail from session and set it to the created field in db
 			newTask.setCreatedBy(usermail);
+			newTask.setNewPoints(Integer.parseInt(requestData.get("oldPoints")));
 			newTask.save();
 
 		}
 
-		
-		 //Check if the task is recurring and add it into db based on weekly or monthly basis with number of tasks to be added given by user
-		 
-		
+
+		//Check if the task is recurring and add it into db based on weekly or monthly basis with number of tasks to be added given by user
+
+
 		if (newTask.isRecurring_status()) {
 
 			if (recurring_type.equals("weekly")) {									//To add weekly Task
@@ -120,74 +241,74 @@ import static play.libs.Json.toJson;
 			}
 
 		}
-		if (assignedToEmailFound != null
+		if ((newTask.getEmailAssignedTo()==null) || (assignedToEmailFound != null
 				&& assignedToEmailFound.getEmail().equals(
-						newTask.getEmailAssignedTo())) {
+						newTask.getEmailAssignedTo())))  {
 			newTask.save();
 		}
 
 		return ok(views.html.dashboard.render(""));
 
 	}
-	
-	
-	public static void dbinsertREcurringTask(int i,int j,int type_recurring){
-		 		
-		 		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
-		 		String usermail = session("connectedmail");					//Get the user mail from session and set it to the created field in db
-		 		newTask.setCreatedBy(usermail);
-		 		int n=j*i;													//generate value of recurring tasks using the loop to add i number of times in db
-		 		String startdate= newTask.getStartDate();					//Get the start and end date from the db
-		 		String enddate= newTask.getEndDate();
-		 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");	//Formatting from String to Date data type
-		 		
-		 		String dateInString_StartDate=startdate;
-		 		String dateInString_EndDate=enddate;
-		 		
-		 		
-		 		try {
-		 			Date date1 = sdf.parse(dateInString_StartDate);
-		 			Date date2 = sdf.parse(dateInString_EndDate);
-		 			if(type_recurring==0){
-		 				Calendar c1 = Calendar.getInstance();
-			 			c1.setTime(date1); 									// Now use the retrieved start date.
-			 			c1.add(Calendar.DATE, n); 							// Adding n = 7 days if weekly or or n=30*no of times the user has requested to insert
-			 			String output = sdf.format(c1.getTime());
-			 			newTask.setStartDate(output);
-			 			
-			 			Calendar c2 = Calendar.getInstance();
-			 			c2.setTime(date2); 									// Now use the retrieved end date.
-			 			c2.add(Calendar.DATE, n); 							// Adding n=7 days
-			 			String output2 = sdf.format(c2.getTime());
-			 			newTask.setEndDate(output2);
-		 				
-		 			}
-		 			if(type_recurring==1){
-		 				Calendar c1 = Calendar.getInstance();
-			 			c1.setTime(date1); 									// Now use the retrieved start date.
-			 			c1.add(Calendar.MONTH, i); 							// Adding 1 month to the ith recurring task
-			 			String output = sdf.format(c1.getTime());
-			 			newTask.setStartDate(output);
-			 			
-			 			Calendar c2 = Calendar.getInstance();
-			 			c2.setTime(date2); 									// Now use the retrieved end date.
-			 			c2.add(Calendar.MONTH, i); 							// Adding 1 month to the ith recurring task
-			 			String output2 = sdf.format(c2.getTime());
-			 			newTask.setEndDate(output2);
-		 				
-		 			}
-	
-		 		} catch (ParseException e) {
-		 			
-		 		e.printStackTrace();
-		 		}
-		 			
-		 		
-		 		newTask.save();
- 		
-		 	}
 
-	
+
+	public static void dbinsertREcurringTask(int i,int j,int type_recurring){
+
+		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
+		String usermail = session("connectedmail");					//Get the user mail from session and set it to the created field in db
+		newTask.setCreatedBy(usermail);
+		int n=j*i;													//generate value of recurring tasks using the loop to add i number of times in db
+		String startdate= newTask.getStartDate();					//Get the start and end date from the db
+		String enddate= newTask.getEndDate();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");	//Formatting from String to Date data type
+
+		String dateInString_StartDate=startdate;
+		String dateInString_EndDate=enddate;
+
+
+		try {
+			Date date1 = sdf.parse(dateInString_StartDate);
+			Date date2 = sdf.parse(dateInString_EndDate);
+			if(type_recurring==0){
+				Calendar c1 = Calendar.getInstance();
+				c1.setTime(date1); 									// Now use the retrieved start date.
+				c1.add(Calendar.DATE, n); 							// Adding n = 7 days if weekly or or n=30*no of times the user has requested to insert
+				String output = sdf.format(c1.getTime());
+				newTask.setStartDate(output);
+
+				Calendar c2 = Calendar.getInstance();
+				c2.setTime(date2); 									// Now use the retrieved end date.
+				c2.add(Calendar.DATE, n); 							// Adding n=7 days
+				String output2 = sdf.format(c2.getTime());
+				newTask.setEndDate(output2);
+
+			}
+			if(type_recurring==1){
+				Calendar c1 = Calendar.getInstance();
+				c1.setTime(date1); 									// Now use the retrieved start date.
+				c1.add(Calendar.MONTH, i); 							// Adding 1 month to the ith recurring task
+				String output = sdf.format(c1.getTime());
+				newTask.setStartDate(output);
+
+				Calendar c2 = Calendar.getInstance();
+				c2.setTime(date2); 									// Now use the retrieved end date.
+				c2.add(Calendar.MONTH, i); 							// Adding 1 month to the ith recurring task
+				String output2 = sdf.format(c2.getTime());
+				newTask.setEndDate(output2);
+
+			}
+
+		} catch (ParseException e) {
+
+			e.printStackTrace();
+		}
+
+
+		newTask.save();
+
+	}
+
+
 
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -195,42 +316,45 @@ import static play.libs.Json.toJson;
 		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all(); //extracting all tasks from the database
 		return ok(toJson(tasks));  													//passing the tasks as a json object
 	}
-	
-	
 
-	
+
+
+
 	public static Result showMyRecurringTasks(){
 		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();  		//list with all the tasks
 		List<TaskInfo> myRecurringTasks = new ArrayList<TaskInfo>();  					 //empty list taken as array for purpose
 		for(TaskInfo eachTask : Tasks)  																//for each task in the list of all tasks,
-		if(eachTask.isRecurring_status() &&  eachTask.getEmailAssignedTo().equalsIgnoreCase(session("connectedmail")))			//if the status of the task is not done,
-			myRecurringTasks.add(eachTask);											    	//that task is added to the incompleteTasks list
+			if(eachTask.isRecurring_status() &&  eachTask.getEmailAssignedTo()!=null && eachTask.getEmailAssignedTo().equalsIgnoreCase(session("connectedmail")))			//if the status of the task is not done,
+				myRecurringTasks.add(eachTask);											    	//that task is added to the incompleteTasks list
 		return ok(toJson(myRecurringTasks));										//the incompleteTasks list with all the tasks in a list is sent as Json Object
 
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	
-	
+
+
 	public static Result showMyTasks(){  													//method to show only user tasks in the system, i.e, only tasks assigned to the particular user
 		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();			//extracting all tasks from the ddatabase into a list
 		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));
 		List<TaskInfo> myTasks = new ArrayList<TaskInfo>();									//creating an empty list of the type object TaskInfo
 		String usermail = session("connectedmail");											//getting the current session email of the current user
+		
 		for(TaskInfo eachTask:tasks)														//for each task in the list of tasks
 		{	
-			if(eachTask.getEmailAssignedTo().equalsIgnoreCase(currentUser.getEmail()))		//the email to which the task is assigned is checked with the current session email
+			if(eachTask.getEmailAssignedTo()!=null && eachTask.getEmailAssignedTo().equalsIgnoreCase(currentUser.getEmail()))		//the email to which the task is assigned is checked with the current session email
 				myTasks.add(eachTask);														//if they are equal, the task is added to the mist myTasks
 		}
+		
+		System.out.println("mine"+myTasks);
 		return ok(toJson(myTasks));															//list myTasks is sent as a json object
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	
+
 	public static Result taskUpdate(String taskID) {											//method to update task which is incomplete, to assign it to the user himself
 		//TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
 		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
-		
+
 		System.out.println("taskID"+taskID);
 		String usermail = session("connectedmail"); 							//getting the current email session of the user
 		existingTask.setEmailAssignedTo(usermail);								//changing the email task assigned to, to the current user
@@ -253,7 +377,7 @@ import static play.libs.Json.toJson;
 	 * If the difference is negative (i.e. he has earned more points than the average points earned by others,
 	 * then the difference is rounded to 0 and displayed (indicating that he has done fair share of work)
 	 */ 
-	
+
 	public static Result getPointsToComplete()  {
 		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));	// get current user from session
 		double earnedPoints = currentUser.getScore();					//get points earned by him until now
@@ -267,19 +391,19 @@ import static play.libs.Json.toJson;
 		double scoreOfOtherUsers=0;
 		for(Person user : otherUsers)
 			scoreOfOtherUsers += user.getScore();
-		
+
 		/* Here, Exception handling is done.
-		* Case: if currently logged in user is the only user in the database & none of his roommates are registered,
-		* then otherUsers will be 0. So, when finding average using the formula : (sum of scores)/No.Of.Users,
-		* the denominator would throw a divideByZero Exception or NumberFormatException.
-		* But the case has been handled by performing division only if there are other users in the database. ( as shown below)
-		*/
+		 * Case: if currently logged in user is the only user in the database & none of his roommates are registered,
+		 * then otherUsers will be 0. So, when finding average using the formula : (sum of scores)/No.Of.Users,
+		 * the denominator would throw a divideByZero Exception or NumberFormatException.
+		 * But the case has been handled by performing division only if there are other users in the database. ( as shown below)
+		 */
 		if(otherUsers.size()>0)    
 			pointsToComplete=scoreOfOtherUsers/otherUsers.size()-earnedPoints;
 
 		/* If current user's earned points are above the average of other's points, 
-		*then the negative difference is rounded to zero. 
-		*/
+		 *then the negative difference is rounded to zero. 
+		 */
 		if(pointsToComplete<0)
 			pointsToComplete=0;
 
@@ -290,20 +414,20 @@ import static play.libs.Json.toJson;
 		return ok(userPoints);
 
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	
+
 	public static Result showFriends() {											//method to show friends
 		List<Person> persons = new Model.Finder(String.class,Person.class).all(); 	//extracting all the persons in the database
 		return ok(toJson(persons));													//passing persons as Json object for displaying
 	}
-	
-	
+
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	
-	
+
+
 	public static Result personUpdate(String taskID){											//method to update the score of a person, takes task as the parameter
-		 
+
 		//TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
 		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
 		System.out.println("title : "+existingTask.getTitle()+ existingTask.getDone());
@@ -314,31 +438,31 @@ import static play.libs.Json.toJson;
 		//we get the user email id who is assigned to the task
 		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));		//we extract the user based on the email id obtained above
 		int currentscore = currentUser.getScore();						//the already present score of the user the taken into currentscore by using getter
-		currentUser.setScore(existingTask.getPoints()+currentscore);	//now, the score of user is set to current score+ points of the task which he has done
+		currentUser.setScore(existingTask.getOldPoints()+currentscore);	//now, the score of user is set to current score+ points of the task which he has done
 		currentUser.save();
 		return ok(views.html.dashboard.render(""));
-		}
-	
+	}
 
-	
+
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	
-	
+
+
 	public static Result showIncompleteTasks()	{    									//to show incomplete tasks out of the whole list of tasks
 		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();  		//list with all the tasks
 		List<TaskInfo> incompleteTasks = new ArrayList<TaskInfo>();  					 //empty list taken as array for purpose
 		for(TaskInfo eachTask : Tasks)  																//for each task in the list of all tasks,
-		if(!eachTask.getDone() &&  !eachTask.getEmailAssignedTo().equalsIgnoreCase(session("connectedmail")))			//if the status of the task is not done,
-			incompleteTasks.add(eachTask);											    	//that task is added to the incompleteTasks list
+			if(!eachTask.getDone() &&  eachTask.getEmailAssignedTo()!=null && !eachTask.getEmailAssignedTo().equalsIgnoreCase(session("connectedmail")))			//if the status of the task is not done,
+				incompleteTasks.add(eachTask);											    	//that task is added to the incompleteTasks list
 		return ok(toJson(incompleteTasks));										//the incompleteTasks list with all the tasks in a list is sent as Json Object
 
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	
-	
-	
-			
+
+
+
+
 	public static Result checkPerson() {																//check if the person exists in the database or not
 		Login loginInfo=Form.form(Login.class).bindFromRequest().get();		
 		@SuppressWarnings("rawtypes")
@@ -368,7 +492,7 @@ import static play.libs.Json.toJson;
 
 
 
-		
+
 
 	public static class Login {
 
@@ -388,7 +512,7 @@ import static play.libs.Json.toJson;
 			this.password = password;
 		}
 	}
-	
+
 	public static class TaskIDRetrieval{
 		private String taskID;
 		public String getTaskID()
@@ -398,5 +522,5 @@ import static play.libs.Json.toJson;
 		public void setTaskID(String taskID) {
 			this.taskID = taskID;
 		}
-	
-}}
+
+	}}

@@ -24,7 +24,7 @@ $(document).ready(
 					$('#task_recurring').append("<h2>Recurring Tasks</h2>");
 					$('#task_recurring').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score");
 					jQuery.each(myRecurringTasks, function(i,task) {
-						$('#task_recurring').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.points+' <form role="form" action="" method=""> <input type="submit" class="btn btn-success" id="mybutton" value="Done!"></input></form></li></td></tr>');
+						$('#task_recurring').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.oldPoints+' <form role="form" action="" method=""> <input type="submit" class="btn btn-success" id="mybutton" value="Done!"></input></form></li></td></tr>');
 						$('#task_recurring').show();
 				});
 			});
@@ -44,7 +44,7 @@ $(document).ready(
 					$('#mytask_div').append("<h2>My Tasks</h2>");
 					$('#mytask_div').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score");
 					jQuery.each(myTasks, function(i,task) {
-						$('#mytask_div').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.points+' <form role="form" action="/personUpdate/'+task.taskID+'" method="POST"> <input type="submit" class="btn btn-success" id="mybutton" value="Done!"></input></form></li></td></tr>');
+						$('#mytask_div').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.oldPoints+' <form role="form" action="/personUpdate/'+task.taskID+'" method="POST"> <input type="submit" class="btn btn-success" id="mybutton" value="Done!"></input></form></li></td></tr>');
 						$('#mytask_div').show();
 				});
 			});
@@ -64,7 +64,7 @@ $(document).ready(
 					$('#task_incomplete').prepend("<h2>Incomplete Tasks</h2>");
 					$('#task_incomplete').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score");
 					jQuery.each(incompleteTasks, function(i,task) {
-						$('#task_incomplete').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.points+' <form id="TaskIDForm" role="form" action="/taskUpdate/'+task.taskID+'" method="POST"> <input type="submit" class="btn btn-success" id="mybutton" value="Assign it to Me!"></input></form></li></td></tr>');
+						$('#task_incomplete').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.oldPoints+' <form id="TaskIDForm" role="form" action="/taskUpdate/'+task.taskID+'" method="POST"> <input type="submit" class="btn btn-success" id="mybutton" value="Assign it to Me!"></input></form></li></td></tr>');
 						$('#task_incomplete').show();
 				});
 			});

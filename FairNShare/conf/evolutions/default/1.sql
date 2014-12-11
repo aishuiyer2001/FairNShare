@@ -25,7 +25,8 @@ create table task_info (
   recurring_status          boolean,
   start_date                varchar(255),
   end_date                  varchar(255),
-  points                    integer,
+  old_points                integer,
+  new_points                integer,
   constraint pk_task_info primary key (task_id))
 ;
 

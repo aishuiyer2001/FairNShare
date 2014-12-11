@@ -36,7 +36,7 @@
 						<li><a id="task-page" style="cursor:hand;">All Tasks</a></li>
 						<li><a id="mytask-page" style="cursor:hand;">My Tasks</a></li>
 						<li><a id="myRecurringtask-page" style="cursor:hand;">My Recurring Tasks</a></li>
-						<li><a id="incomplete-page" style="cursor:hand;">Incomplete Tasks</a></li>
+						<li><a id="incomplete-page" style="cursor:hand;"> Incomplete Tasks</a></li>
 						<li><a data-toggle="modal" data-target="#myModal" style="cursor:hand;">Add
 								Tasks</a></li>
 						<li><a style="cursor:hand;">Manage Tasks</a></li>
@@ -152,14 +152,14 @@
 						</div>
 					</div>
 					<div class="form-group">
-						<label for="email">Email:</label>
+						<label for="email">Email To Assign:</label>
 						<input type="email" name="emailAssignedTo" id="emailAssignedTo"
-							class="form-control input-lg" placeholder="Email"
+							class="form-control input-lg" placeholder="Email To Assign"
 							tabindex="3">
 					</div>
 					<div class="form-group">
-						<label for="points">Points for the task:</label>
-						<input type="number" name="points" id="points" min="5" max="100" step="5"
+						<label for="oldPoints">Points for the task:</label>
+						<input type="number" name="oldPoints" id="oldPoints" min="5" max="100" step="5"
 							class="form-control input-lg" placeholder="0" tabindex="4"
 							required>
 					</div>
@@ -169,7 +169,7 @@
 								<label for="start date">Start Date:</label>
 								<input type="date" name="startDate" id="startDate"
 									class="form-control input-lg" placeholder="start date"
-									tabindex="5" required>
+									tabindex="5" >
 							</div>
 						</div>
 						<div class="col-xs-12 col-sm-6 col-md-6">
@@ -177,7 +177,7 @@
 								<label for="end date">End Date:</label>
 								<input type="date" name="endDate" id="endDate"
 									class="form-control input-lg" placeholder="end date"
-									tabindex="6" required>
+									tabindex="6" >
 							</div>
 						</div>
 					</div>
@@ -203,6 +203,7 @@
  							<div class="form-group">
  								<select name="recurring_type"
  									id="recurring_type" class="form-control input-lg">
+ 									<option value=" "></option>
  									<option value="weekly">Weekly</option>
  									<option value="monthly">Monthly</option>
  								</select>
