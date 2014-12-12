@@ -83,11 +83,31 @@ import static play.libs.Json.toJson;
 		DynamicForm requestData = Form.form().bindFromRequest();
 		String recurring_type = requestData.get("recurring_type");
 		int recurring_countNumber;
+		int days=0;
 		String recurring_count = requestData.get("taskCount");
 		String ending_in = requestData.get("enddays");
-		System.out.println("enddays"+ending_in);
-			int days = Integer.parseInt(ending_in);
+		if(ending_in.equals("")){
+		days = 0;
+		}
+		else{
+			days = Integer.parseInt(ending_in);
+		}
 		
+		Date start_date = dateFormat.parse(newTask.getStartDate());  //get the starting date
+		Calendar c = Calendar.getInstance();
+		c.setTime(start_date);
+		String end=null;
+		if(newTask.getEndDate()==null && days>0)		//if the number of days are specified
+		{
+			c.add(Calendar.DATE, days);		//add the number of days to the start date of the task
+			end = dateFormat.format(c.getTime());
+			newTask.setEndDate(end);		//set the added date as the end date for the task
+			newTask.save();
+			System.out.println("END DATE IN FUNCTION"+end+"\nGET TASK END DATE"+newTask.getEndDate());
+		}  
+		else
+			newTask.save();
+
 		
 		if(recurring_count.equals("")){
 	
@@ -106,6 +126,7 @@ import static play.libs.Json.toJson;
 
 		String usermail = session("connectedmail");					//Get the user mail from session and set it to the created field in db
  		newTask.setCreatedBy(usermail);
+ 		newTask.save();
 
 		
 		 //Check if the task is recurring and add it into db based on weekly or monthly basis with number of tasks to be added given by user
@@ -120,7 +141,7 @@ import static play.libs.Json.toJson;
 
 				for (int i = 1; i < recurring_countNumber; i++) {
 
-					Application.dbinsertREcurringTask(i, j, type_recurring);		//Call dbinsertREcurringTask to insert into db
+					Application.dbinsertREcurringTask(i, j, type_recurring, end);		//Call dbinsertREcurringTask to insert into db
 				}
 			}
 			if (recurring_type.equals("monthly")) {									//To add weekly Task
@@ -130,7 +151,7 @@ import static play.libs.Json.toJson;
 
 				for (int i = 1; i < recurring_countNumber; i++) {
 
-					Application.dbinsertREcurringTask(i, j, type_recurring);		//Call dbinsertREcurringTask to insert into db
+					Application.dbinsertREcurringTask(i, j, type_recurring,end);		//Call dbinsertREcurringTask to insert into db
 				}
 			}
 
@@ -141,19 +162,6 @@ import static play.libs.Json.toJson;
 			newTask.save();
 		}
 		
-		Date start_date = dateFormat.parse(newTask.getStartDate());  //get the starting date
-		Calendar c = Calendar.getInstance();
-		c.setTime(start_date);
-		
-		if(newTask.getEndDate()==null && days>0)		//if the number of days are specified
-		{
-			c.add(Calendar.DATE, days);		//add the number of days to the start date of the task
-			String end = dateFormat.format(c.getTime());
-			newTask.setEndDate(end);		//set the added date as the end date for the task
-			newTask.save();
-		}  
-		else
-			newTask.save();
 	
 		
 		return ok(views.html.dashboard.render(""));
@@ -161,14 +169,15 @@ import static play.libs.Json.toJson;
 	}
 	
 	
-	public static void dbinsertREcurringTask(int i,int j,int type_recurring){
+	public static void dbinsertREcurringTask(int i,int j,int type_recurring, String end){
 		 		
 		 		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
 		 		String usermail = session("connectedmail");					//Get the user mail from session and set it to the created field in db
 		 		newTask.setCreatedBy(usermail);
 		 		int n=j*i;													//generate value of recurring tasks using the loop to add i number of times in db
 		 		String startdate= newTask.getStartDate();					//Get the start and end date from the db
-		 		String enddate= newTask.getEndDate();
+		 		String enddate= end;
+		 		System.out.println(enddate);
 		 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");	//Formatting from String to Date data type
 		 		
 		 		String dateInString_StartDate=startdate;

@@ -141,6 +141,8 @@ public class TaskInfo extends Model
 	public void setEndDate(String endDate) {
 		if(endDate.length()>0)
 			this.endDate = endDate;
+		else 
+			this.endDate = null;
 	}
 
 
@@ -152,8 +154,5 @@ public class TaskInfo extends Model
 	public void setCreatedBy(String createdBy) {
 		this.createdBy = createdBy;
 	}
-
-	
-
 
 }

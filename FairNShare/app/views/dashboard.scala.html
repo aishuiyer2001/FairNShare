@@ -9,7 +9,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 <script type='text/javascript' src='@routes.Assets.at("new.js")'></script>
 <script type='text/javascript' src='@routes.Assets.at("dashboard.js")'></script>
-
+<script type='text/javascript' src='@routes.Assets.at("radio.js")'></script>
 @import helper._ 
 
 @main("Dashboard") {
@@ -132,6 +132,7 @@
 <!-- End of id references for various elements in the code-->
 
 <!-- Beginning the Modal for Add Task function -->
+
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog"
 	aria-labelledby="myModalLabel" aria-hidden="true">
 	<div class="modal-dialog">
@@ -185,23 +186,27 @@
 									tabindex="5" required/>
 							</div>
 						
-						<div class="form-group">
-						<table>	<tr><td>
-								<input type="radio" id="DateOption" name="date" value="date">
-								<label for="end date">End Date: 
+							<div class="form-group">
+						<table>	<tr>
+								
+								<b>End Date: <input type="radio" id="r1" name="date" value="date">
+								<div class="cal">
+								<div class="col-xs-12 col-sm-7 col-md-6">
 								<input type="date" name="endDate" id="endDate"
 									class="form-control input-lg" placeholder="end date"
-									tabindex="6" optional/>
-								</input>
-							</td> &nbsp; &nbsp;
-							<td>
-								<input type="radio" id="DaysOption" name="date" value="days">
-								<label for="end date">Days:
+									tabindex="7" />
+								</div></div>
+							</tr> &nbsp; &nbsp;
+							<tr>
+								
+								<b>Days: <input type="radio" id="r2" name="date" value="days" />
+								<div class="text">
+								<div class="col-xs-12 col-sm-7 col-md-6">
 								<input type="text" name="enddays" id="enddays"
 									class="form-control input-lg" placeholder="to be completed within"
-									tabindex="6" optional/>
-								</input>
-							</td></tr></table>
+									tabindex="7" />
+								</div></div>
+							</tr></table>
 						</div>
 						
 					<div class="row">
@@ -219,27 +224,30 @@
  									tabindex="7">
  							</div>
  						</div>
- 						
+ 						<br>
  						<div class="col-xs-6 col-sm-3 col-md-2"></div>
  						
  						<div class="col-xs-6 col-sm-3 col-md-6">
+ 							<div class="check_text">
  							<div class="form-group">
  								<select name="recurring_type"
  									id="recurring_type" class="form-control input-lg">
  									<option value="weekly">Weekly</option>
  									<option value="monthly">Monthly</option>
  								</select>
- 
  							</div>
+ 							</div>
+ 						
  						</div>
- 						</div>
- 						<div class="row">
+ 					
  						<div class="col-xs-12 col-sm-7 col-md-6">
   							<div class="form-group" >
- 								<label for="No of tasks">No of times the task should recur:</label><input type="text"
+  							<div class="days_text">
+ 								<label for="No of tasks">No of times the task should recur:</label>
+ 									<input type="text"
  									name="taskCount" id="taskCount" class="form-control input-lg"
  									placeholder="1" tabindex="8">
-  							</div>
+  							</div></div>
   						</div>
  					</div>
 					<button type="submit" class="btn btn-success">Create Task</button>

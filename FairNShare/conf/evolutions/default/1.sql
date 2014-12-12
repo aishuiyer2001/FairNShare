@@ -27,7 +27,6 @@ create table task_info (
   end_date                  varchar(255),
   old_points                integer,
   new_points                integer,
-  date                      boolean,
   constraint pk_task_info primary key (task_id))
 ;
 

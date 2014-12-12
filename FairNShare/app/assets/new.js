@@ -1,10 +1,12 @@
 $(document).ready(
-
+		
+		
+		
 		/* displays the points earned by user and points needed by him to do fair share of work,
 		 * when the user is redirected to the dashboard after log in
 		 */
 
-		function() {       
+		function points() {       
 			$.get("/getPointsToComplete",function(data,status){
 				$("#toComplete").text(data.PointsToComplete);
 				$("#earned").text(data.EarnedPoints);
@@ -110,6 +112,7 @@ $(document).ready(
 					$('#userPoints').hide();
 					$('#myincompletetask_div').hide();
 					$('#dashboard_div').hide();
+					$('#task_incomplete').hide();
 					$('#task_div').hide();
 					$('#mytask_overdue').hide();
 					$('#alltask_overdue').prepend("<h2>All Overdue Tasks</h2>");
@@ -131,12 +134,13 @@ $(document).ready(
 					$('#userPoints').hide();
 					$('#myincompletetask_div').hide();
 					$('#dashboard_div').hide();
+					$('#task_incomplete').hide();
 					$('#task_div').hide();
 					$('#alltask_overdue').hide();
 					$('#mytask_overdue').prepend("<h2>My Overdue Tasks</h2>");
 					$('#mytask_overdue').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score");
 					jQuery.each(myoverdueTasks, function(i,task) {
-						$('#mytask_overdue').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.newPoints+'</li></td></tr>');
+						$('#mytask_overdue').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.Points+'</li></td></tr>');
 						$('#mytask_overdue').show();
 				});
 			});
