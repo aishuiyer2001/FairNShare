@@ -3,6 +3,7 @@ import views.html.*;
 
 import java.awt.Window;
 import java.awt.event.WindowEvent;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import javax.swing.JButton;
 
 import org.h2.engine.User;
+import org.h2.expression.ExpressionList;
 
 import ch.qos.logback.core.joran.action.NewRuleAction;
 import ch.qos.logback.core.joran.action.ActionUtil.Scope;
@@ -68,9 +70,10 @@ public class Application extends Controller {
 
 	public static Result createTask() throws ParseException
 	{
+
 		TaskInfo newTask = new TaskInfo();
 		DynamicForm requestData = Form.form().bindFromRequest();
-
+		System.out.println("toggle"+ requestData.get("toggleValue"));		// 1- new task, 2 - reusing a task
 		newTask.setCreatedBy(session("connectedmail"));
 		newTask.setDescription(requestData.get("description"));
 
@@ -82,25 +85,34 @@ public class Application extends Controller {
 
 		newTask.setStartDate(requestData.get("startDate"));
 		newTask.setEndDate(requestData.get("endDate"));
-		newTask.setOldPoints(Integer.parseInt(requestData.get("oldPoints")));
-		newTask.setNewPoints(Integer.parseInt(requestData.get("oldPoints")));
+		System.out.println("space"+requestData.get("recurring_type")+"denmo");
+		System.out.println("endDate : "+requestData.get("endDate"));
+
+		System.out.println("descriptopn : "+requestData.get("description"));
+		System.out.println("points : "+requestData.get("newPoints"));
+		newTask.setOldPoints(Double.parseDouble(requestData.get("newPoints")));
+		newTask.setNewPoints(Double.parseDouble(requestData.get("newPoints")));
 		newTask.setTitle(requestData.get("title"));
 
-		if(!requestData.get("recurring_type").equals(""))
+		if(!requestData.get("recurring_type").equals(" "))
 		{
+			//System.out.println("shitt");
 			newTask.setRecurring_status(true);
 			if(newTask.getStartDate()!=null)
 				newTask.setEndDate(getEndDate(newTask.getStartDate(), requestData.get("recurring_type")));
 		}
-
+		if(requestData.get("toggleValue").split(":")[0].equals("2"))		// reusable task	
+			TaskInfo.findTask.ref(Long.parseLong(requestData.get("toggleValue").split(":")[1])).delete();
+		
 		List<TaskInfo> allTasks = new Model.Finder(String.class,TaskInfo.class).all();
 		boolean taskAlreadyExists = false;
 		for(TaskInfo task : allTasks)
 			if(task.getTitle().equalsIgnoreCase(newTask.getTitle()))
 				taskAlreadyExists=true;
-		if(!taskAlreadyExists)
-		{
+		
+		
 			newTask.save(); 	// only if newTask could be saved, proceed with next recurring
+			System.out.println(newTask.isRecurring_status()+" here");
 
 			if(newTask.isRecurring_status())
 			{
@@ -130,11 +142,11 @@ public class Application extends Controller {
 						newRecurringTask.save();
 					}
 				}
-			}
+			
 
 			return ok(views.html.dashboard.render("Task Created !"));
 		}
-		
+
 		return ok(views.html.dashboard.render(""));
 	}
 
@@ -177,140 +189,6 @@ public class Application extends Controller {
 	}
 
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static Result createTask1() {
-
-		//TaskInfo newTask = Form.form(TaskInfo.class).bindFromRequest().get();
-
-		TaskInfo newTask = new TaskInfo();
-		DynamicForm requestData = Form.form().bindFromRequest();
-		String recurring_type = requestData.get("recurring_type");
-		int recurring_countNumber;
-		String recurring_count = requestData.get("taskCount");
-
-
-		if(recurring_count.equals("")){
-
-			recurring_count="1";
-			recurring_countNumber = Integer.parseInt(recurring_count);
-
-		}
-		else{
-			recurring_countNumber = Integer.parseInt(recurring_count);
-		}
-
-
-		Person assignedToEmailFound = (Person) new Model.Finder(String.class,
-				Person.class).byId(requestData.get("emailAssignedTo"));
-		System.out.println("here"+requestData.get("emailAssignedTo")+"--");
-		if ((requestData.get("emailAssignedTo")==null) || (assignedToEmailFound != null
-				&& assignedToEmailFound.getEmail().equals(
-						requestData.get("emailAssignedTo")))) {
-			String usermail = session("connectedmail"); // Get the user mail from session and set it to the created field in db
-			newTask.setCreatedBy(usermail);
-			newTask.setNewPoints(Integer.parseInt(requestData.get("oldPoints")));
-			newTask.save();
-			//return ok(toJson(newTask));	
-
-		}
-
-
-		//Check if the task is recurring and add it into db based on weekly or monthly basis with number of tasks to be added given by user
-
-
-		if (newTask.isRecurring_status()) {
-
-			if (recurring_type.equals("weekly")) {									//To add weekly Task
-
-				int j = 7;
-				int type_recurring = 0;
-
-				for (int i = 1; i < recurring_countNumber; i++) {
-
-					Application.dbinsertREcurringTask(i, j, type_recurring);		//Call dbinsertREcurringTask to insert into db
-				}
-			}
-			if (recurring_type.equals("monthly")) {									//To add weekly Task
-
-				int j = 30;
-				int type_recurring = 0;
-
-				for (int i = 1; i < recurring_countNumber; i++) {
-
-					Application.dbinsertREcurringTask(i, j, type_recurring);		//Call dbinsertREcurringTask to insert into db
-				}
-			}
-
-		}
-		if ((newTask.getEmailAssignedTo()==null) || (assignedToEmailFound != null
-				&& assignedToEmailFound.getEmail().equals(
-						newTask.getEmailAssignedTo())))  {
-			newTask.save();
-		}
-
-		return ok(views.html.dashboard.render(""));
-
-	}
-
-
-	public static void dbinsertREcurringTask(int i,int j,int type_recurring){
-
-		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
-		String usermail = session("connectedmail");					//Get the user mail from session and set it to the created field in db
-		newTask.setCreatedBy(usermail);
-		int n=j*i;													//generate value of recurring tasks using the loop to add i number of times in db
-		String startdate= newTask.getStartDate();					//Get the start and end date from the db
-		String enddate= newTask.getEndDate();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");	//Formatting from String to Date data type
-
-		String dateInString_StartDate=startdate;
-		String dateInString_EndDate=enddate;
-
-
-		try {
-			Date date1 = sdf.parse(dateInString_StartDate);
-			Date date2 = sdf.parse(dateInString_EndDate);
-			if(type_recurring==0){
-				Calendar c1 = Calendar.getInstance();
-				c1.setTime(date1); 									// Now use the retrieved start date.
-				c1.add(Calendar.DATE, n); 							// Adding n = 7 days if weekly or or n=30*no of times the user has requested to insert
-				String output = sdf.format(c1.getTime());
-				newTask.setStartDate(output);
-
-				Calendar c2 = Calendar.getInstance();
-				c2.setTime(date2); 									// Now use the retrieved end date.
-				c2.add(Calendar.DATE, n); 							// Adding n=7 days
-				String output2 = sdf.format(c2.getTime());
-				newTask.setEndDate(output2);
-
-			}
-			if(type_recurring==1){
-				Calendar c1 = Calendar.getInstance();
-				c1.setTime(date1); 									// Now use the retrieved start date.
-				c1.add(Calendar.MONTH, i); 							// Adding 1 month to the ith recurring task
-				String output = sdf.format(c1.getTime());
-				newTask.setStartDate(output);
-
-				Calendar c2 = Calendar.getInstance();
-				c2.setTime(date2); 									// Now use the retrieved end date.
-				c2.add(Calendar.MONTH, i); 							// Adding 1 month to the ith recurring task
-				String output2 = sdf.format(c2.getTime());
-				newTask.setEndDate(output2);
-
-			}
-
-		} catch (ParseException e) {
-
-			e.printStackTrace();
-		}
-
-
-		newTask.save();
-
-	}
-
-
-
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Result showTasks() {												//method to show all tasks in the system
@@ -337,13 +215,13 @@ public class Application extends Controller {
 		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));
 		List<TaskInfo> myTasks = new ArrayList<TaskInfo>();									//creating an empty list of the type object TaskInfo
 		String usermail = session("connectedmail");											//getting the current session email of the current user
-		
+
 		for(TaskInfo eachTask:tasks)														//for each task in the list of tasks
 		{	
 			if(eachTask.getEmailAssignedTo()!=null && eachTask.getEmailAssignedTo().equalsIgnoreCase(currentUser.getEmail()))		//the email to which the task is assigned is checked with the current session email
 				myTasks.add(eachTask);														//if they are equal, the task is added to the mist myTasks
 		}
-		
+
 		System.out.println("mine"+myTasks);
 		return ok(toJson(myTasks));															//list myTasks is sent as a json object
 	}
@@ -355,115 +233,109 @@ public class Application extends Controller {
 		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
 
 		TaskInfo allTasks = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
-		
+
 		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();
-		
+
 		for(TaskInfo t: tasks)
 		{   
 			double points=allTasks.getnewPoints();
 			allTasks.setOldPoints(points);
 		}
-		
-		
+
+
 		//TaskInfo pointsList = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(existingTask.getnewPoints());
 		existingTask.setAssigned(true);
 		existingTask.save();
-		
+
 		double sumOfAllUnassignedTasks = 0;
 		int noOfTasks= tasks.size();
-		
+
 		for(TaskInfo t: tasks)
 		{   
 			if(t.getAssigned())
 			{
-				
+
 			}
 			else
 			{
-			sumOfAllUnassignedTasks = sumOfAllUnassignedTasks + t.getnewPoints();
+				sumOfAllUnassignedTasks = sumOfAllUnassignedTasks + t.getnewPoints();
 			}
 		}
-		
-		
+
+
 		System.out.println("taskID"+taskID);
 		String usermail = session("connectedmail"); 							//getting the current email session of the user
 		existingTask.setEmailAssignedTo(usermail);								//changing the email task assigned to, to the current user
-		
+
 		double chosenTaskPoints = existingTask.getnewPoints();
-		
+
 		double sumOfUnchosenTasks = sumOfAllUnassignedTasks - chosenTaskPoints;
 		double totalDelta=(double) (chosenTaskPoints * 0.2);
-		
+
 		double individualDeltaForTaskX =totalDelta/(sumOfUnchosenTasks);
 		double newPointValueofChosenTask = chosenTaskPoints-totalDelta;
-		
+
 		existingTask.setNewPoints(newPointValueofChosenTask);
 		existingTask.save();	
-		
-		
+
+
 		for(TaskInfo t: tasks)
 		{	
-			
+
 			long idOfList= t.getTaskID();
 			int idOfList1 = (int)idOfList;
 			//long l=Long.parseLong(taskID);
 			long idOfselectedTask=Integer.parseInt(taskID);
-			
+
 			//return ok(toJson(l));
-			
+
 			if(idOfList1 != idOfselectedTask)
 			{
-			
+
 				TaskInfo cTask= (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(idOfList1);
-				
+
 				if(cTask.getAssigned())
 				{
-					
+
 				}
 				else
 				{
 					double x=cTask.getnewPoints();
 					double newPointValueofUnchosenTask=(x/sumOfUnchosenTasks)*totalDelta;
-					
-					
+
+
 					double y=newPointValueofUnchosenTask+x;
 					//double newPointValueofUnchosenTask=x+totalDelta *x;
 					//return ok(toJson(y));
 					//return ok(toJson(cTask.getTitle()));
-	
-		
+
+
 					cTask.setNewPoints(y);
 					cTask.save();	
 				}
-				
+
 			}
-			
-		
-			
+
+
+
 		}
-		
-		
-		
-		
+
+
+
+
 		//return ok(toJson(newPointValueofChosenTask)); 
-		
+
 		//return ok(toJson(existingTask));	
-		
+
 		//existingTask.save();													//saving the entry for the task in database
 
 		//return ok(views.html.dashboard.render(""));
-		 
+
 		return ok();
 
-		
-}
 
-	public static Result autoAdjust(String taskID) {
-		
-		
-		return ok();
-		
 	}
+
 
 	/*
 	 * Gives the points needed by a user to be doing fair share of work
@@ -541,38 +413,34 @@ public class Application extends Controller {
 		currentUser.setScore(existingTask.getOldPoints()+currentscore);	//now, the score of user is set to current score+ points of the task which he has done
 		currentUser.save();
 		return ok(views.html.dashboard.render(""));
-		}
-	
-	
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	
-	
-	public static Result reusetaskUpdate(String taskID){											
+	}
 
-		//Method incomplete and left for further implementation as it was decided to take up by the other person earlier
+
+
+
+	public static Result checkIfReusable(String taskStart) throws ParseException
+	{
 		
-		
-		//TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
-		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
-		System.out.println("title : "+existingTask.getTitle()+ existingTask.getDone());
-		//existingTask.setDone(true);
-		System.out.println("title : "+existingTask.getTitle()+ existingTask.getDone());
-		
-		return ok(toJson("existingTask"));	
-		
-		/*
-		existingTask.save();
-		//for that particular task, we change in the database that the task is done
-		//we get the user email id who is assigned to the task
-		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));		//we extract the user based on the email id obtained above
-		int currentscore = currentUser.getScore();						//the already present score of the user the taken into currentscore by using getter
-		currentUser.setScore(existingTask.getnewPoints()+currentscore);	//now, the score of user is set to current score+ points of the task which he has done
-		currentUser.save();
-		return ok(views.html.dashboard.render(""));
-		*/
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		taskStart = "%"+taskStart+"%";
+		List<TaskInfo> suggestionsTemp =TaskInfo.findTask.where()
+				.ilike("title", taskStart)
+				.findList();
+		List<TaskInfo> suggestions = new ArrayList<TaskInfo>();
+		Date currentDate = new Date();
+		System.out.println("suggestions "+suggestionsTemp);
+		for(TaskInfo task : suggestionsTemp)
+		{
+			if(currentDate.after(dateFormat.parse(task.getEndDate())))	// deadline has not passed, hence currently assigned
+			{
+				System.out.println(" before task"+suggestions.size());	
+				suggestions.add(task);
+				System.out.println(" after task"+suggestions.size());				
+			}	
 		}
-	
+		
+			return ok(toJson(suggestions));
+	}
 
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -588,26 +456,14 @@ public class Application extends Controller {
 
 	}
 
-	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	
-	
-	public static Result showReUsableTasks()	{    									//to show incomplete tasks out of the whole list of tasks
-		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();  		//list with all the tasks
-		List<TaskInfo> reUsableTasks = new ArrayList<TaskInfo>();  					 //empty list taken as array for purpose
-		for(TaskInfo eachTask : Tasks)  																//for each task in the list of all tasks,
-		//if(!eachTask.getDone() &&  !eachTask.getEmailAssignedTo().equalsIgnoreCase(session("connectedmail")))			//if the status of the task is not done,
-		reUsableTasks.add(eachTask);											    	//that task is added to the incompleteTasks list
-		return ok(toJson(reUsableTasks));										//the incompleteTasks list with all the tasks in a list is sent as Json Object
-		//return ok(toJson("Tasks"));										//the incompleteTasks list with all the tasks in a list is sent as Json Object
 
-	}
-	
-	
-	
+
+
+
+
 	@SuppressWarnings("unchecked")
-	
-			
+
+
 	public static Result checkPerson() {																//check if the person exists in the database or not
 		Login loginInfo=Form.form(Login.class).bindFromRequest().get();		
 		@SuppressWarnings("rawtypes")
@@ -620,6 +476,8 @@ public class Application extends Controller {
 			session("connected", username);						//Assign it to the session variable
 			session("connectedmail", usermail);	
 			String user = session("connected");
+
+
 			return ok(views.html.dashboard.render("Welcome " + user));
 		}
 

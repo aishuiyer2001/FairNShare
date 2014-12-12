@@ -159,6 +159,8 @@ public class TaskInfo extends Model
 		this.createdBy = createdBy;
 	}
 
-
+	public static Finder<Long,TaskInfo> findTask = new Finder<Long,TaskInfo>(
+		    Long.class, TaskInfo.class
+		  ); 
 
 }

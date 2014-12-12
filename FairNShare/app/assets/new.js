@@ -19,7 +19,6 @@ $(document).ready(
 					$('#userPoints').hide();
 					$("#notification_div").hide();
 					$('#dashboard_div').hide();
-					$('#task_reusable').hide();
 					$('#task_div').hide();
 					$('#mytask_div').hide();
 					$('#task_recurring').append("<h2>Recurring Tasks</h2>");
@@ -41,7 +40,6 @@ $(document).ready(
 					$("#notification_div").hide();
 					$('#task_incomplete').hide();
 					$('#userPoints').hide();
-					$('#task_reusable').hide();
 					$('#dashboard_div').hide();
 					$('#task_div').hide();
 					$('#mytask_div').append("<h2>My Tasks</h2>");
@@ -63,7 +61,6 @@ $(document).ready(
 					$("#notification_div").hide();
 					$('#userPoints').hide();
 					$('#dashboard_div').hide();
-					$('#task_reusable').hide();
 					$('#task_div').hide();
 					$('#task_incomplete').prepend("<h2>Incomplete Tasks</h2>");
 					$('#task_incomplete').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score");
@@ -84,7 +81,6 @@ $(document).ready(
 				$("#dashboard_div").hide();
 				$('#task_recurring').hide();
 				$('#task_incomplete').hide();
-				$('#task_reusable').hide();
 				$('#mytask_div').hide();
 				$.get("/getPointsToComplete",function(data,status){
 					$("#toComplete").text(data.PointsToComplete);
@@ -96,47 +92,8 @@ $(document).ready(
 			});   
 
 			
-			/*JS for User Story 3.2
-			 
-			 */	
-			$("#resuabletask-page").click(function(){
-				$.get("/showReUsableTasks",function(reUsableTasks,status){
-					$('#friend_div').hide();
-					$('#mytask_div').hide();
-					$('#task_recurring').hide();
-					$("#notification_div").hide();
-					$('#userPoints').hide();
-					$('#dashboard_div').hide();
-					$('#task_incomplete').hide();
-					$('#task_div').hide();
-					$('#task_reusable').prepend("<h2>Reusable Tasks</h2>");
-					$('#task_reusable').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score");
-					jQuery.each(reUsableTasks, function(i,task) {
-						$('#task_reusable').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.newPoints+' <form id="ReuseTaskIDForm" role="form" action="/reusetaskUpdate/'+task.taskID+'" method="POST"> <input type="submit" class="btn btn-success" id="mybutton" value="Reuse"></input></form></li></td></tr>');
-						$('#task_reusable').show();
-				});
-			});
-			});
 			
-			$("#myModal").load(function(){
-				$.get("/getReUsableTasks",function(existingTask,status){
-					$('#friend_div').hide();
-					$('#mytask_div').hide();
-					$('#task_recurring').hide();
-					$("#notification_div").hide();
-					$('#userPoints').hide();
-					$('#dashboard_div').hide();
-					$('#task_incomplete').hide();
-					$('#task_div').hide();
-					$('#taskname').prepend("<h2>Reusable Tasks</h2>");
-					$('#taskname').append("<b>task.title");
-					jQuery.each(existingTask, function(i,task) {
-						$('#taskname').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.newPoints+' <form id="TaskIDForm" role="form" action="/taskUpdate/'+task.taskID+'" method="POST"> <input type="submit" class="btn btn-success" id="mybutton" value="Reuse"></input></form></li></td></tr>');
-						$('#task_reusable').show();
-				});
-			});
-			});
-
+			
 
 			
 			
@@ -152,7 +109,6 @@ $(document).ready(
 				$('#task_incomplete').hide();
 				$("#notification_div").hide();
 				$('#task_recurring').hide();
-				$('#task_reusable').hide();
 				$("#dashboard_div").show();
 				$.get("/getPointsToComplete",function(data,status){
 					$("#toComplete").text(data.PointsToComplete);
