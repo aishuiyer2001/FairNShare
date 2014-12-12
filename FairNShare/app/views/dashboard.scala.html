@@ -10,6 +10,7 @@
 <script type='text/javascript' src='@routes.Assets.at("new.js")'></script>
 <script type='text/javascript' src='@routes.Assets.at("dashboard.js")'></script>
 <script type='text/javascript' src='@routes.Assets.at("radio.js")'></script>
+<link rel="stylesheet" type="text/css" href='@routes.Assets.at("autocomplete.css")'>
 @import helper._ 
 
 @main("Dashboard") {
@@ -34,7 +35,7 @@
 						&nbspTasks <span class="fa arrow"></span></a>
 					<ul class="nav nav-second-level">
 						<li><a id="task-page" style="cursor:hand;">All Tasks</a></li>
-						<li><a href="#">My Tasks<span class="fa arrow"></span></a>
+						<li><a href="#">Tasks<span class="fa arrow"></span></a>
 						<ul class="nav nav-second-level">
 						<li><a id="mytask-page" style="cursor:hand;">My Tasks</a></li>
 						<li><a id="myincompletetask-page" style="cursor:hand;">My Incomplete Tasks</a></li>
@@ -151,7 +152,7 @@
 						<div class="col-xs-12 col-sm-6 col-md-6">
 							<div class="form-group">
 								<label for="name">Task Name:</label>
-								<input type="text" name="title" id="title"
+								<input type="text" name="title" id="title" onKeyUp = "trackInputText()"
 									class="form-control input-lg" placeholder="Title" tabindex="1"
 									required>
 							</div>
@@ -250,7 +251,8 @@
   							</div></div>
   						</div>
  					</div>
-					<button type="submit" class="btn btn-success">Create Task</button>
+					<input type="hidden" id="toggleValue" name="toggleValue" value="1:">
+ 					<button type="submit" id="createTask"  class="btn btn-success">Create Task</button>
 					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 				</form>
 			  </div>
@@ -260,4 +262,73 @@
 </div>
 <!-- End of Modal -->
 <!-- End of dashboard render -->
+
+<script>
+
+	// 1 - create task, 2- replace task
+	var selectedTaskTitle="";
+
+	var toggleInt =1;
+
+
+	function trackInputText()
+	{
+
+		var enteredText = document.getElementById("title").value;
+
+		if(enteredText!="")
+		{
+			var suggestionsTitles=[];
+			$.get("/enteredText/"+enteredText).done(function(data) {
+				console.log("suggestions"+data);
+					jQuery.each(data, function(i,task) {
+							suggestionsTitles.push(
+							{  label : task.title,
+							   value : task.title,
+							   object : task
+							});
+						});
+
+
+					$("#title").autocomplete({ 
+						source: suggestionsTitles,
+						select : function(event,ui)
+						{
+							console.log("inside"+ui.item.object.taskID+ui.item.label);
+							document.getElementById("description").value=ui.item.object.description;
+							document.getElementById("newPoints").value=ui.item.object.newPoints;
+							$("#description").prop('readonly', true);
+							$("#newPoints").prop('readonly', true);
+							$("#createTask").html("Replace Task");
+							toggleInt =2;
+							document.getElementById("toggleValue").value=toggleInt+":"+ui.item.object.taskID;
+							selectedTaskTitle=ui.item.label;
+						}
+
+
+					});
+
+
+				}).error(function(){
+					console.log("no suggestions")
+					});
+
+		}
+		else if(toggleInt==2 && enteredText!=selectedTaskTitle)
+		{
+			console.log("inside toggle 2");
+			document.getElementById("description").value="";
+			document.getElementById("newPoints").value="";
+			$("#description").prop('readonly', false);
+			$("#newPoints").prop('readonly', false);
+			$("#createTask").html("Create Task");
+			toggleInt =1;
+			document.getElementById("toggleValue").value=toggleInt+":";
+			selectedTaskTitle="";
+		}
+
+
+	}
+</script>
+
 }

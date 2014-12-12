@@ -18,7 +18,6 @@ $(document).ready(
 					$('#userPoints').hide();
 					$("#notification_div").hide();
 					$('#dashboard_div').hide();
-					$('#task_reusable').hide();
 					$('#mytask_div').hide();
 					$('#myincompletetask_div').hide();
 					$('#alltask_overdue').hide();
@@ -40,7 +39,6 @@ $(document).ready(
 					$('#userPoints').hide();
 					$("#notification_div").hide();
 					$('#dashboard_div').hide();
-					$('#task_reusable').hide();
 					$('#task_div').hide();
 					$('#mytask_div').hide();
 					$('#myincompletetask_div').hide();
@@ -63,7 +61,6 @@ $(document).ready(
 					$("#notification_div").hide();
 					$('#task_incomplete').hide();
 					$('#userPoints').hide();
-					$('#task_reusable').hide();
 					$('#dashboard_div').hide();
 					$('#task_div').hide();
 					$('#myincompletetask_div').hide();
@@ -108,7 +105,6 @@ $(document).ready(
 					$("#notification_div").hide();
 					$('#userPoints').hide();
 					$('#dashboard_div').hide();
-					$('#task_reusable').hide();
 					$('#task_div').hide();
 					$('#myincompletetask_div').hide();
 					$('#alltask_overdue').hide();
@@ -173,7 +169,6 @@ $(document).ready(
 				$("#dashboard_div").hide();
 				$('#task_recurring').hide();
 				$('#task_incomplete').hide();
-				$('#task_reusable').hide();
 				$('#mytask_div').hide();
 				$('#task_incomplete').hide();
 				$('#task_div').hide();

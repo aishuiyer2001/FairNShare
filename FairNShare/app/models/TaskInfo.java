@@ -116,7 +116,11 @@ public class TaskInfo extends Model
 		if(emailAssignedTo!=null && emailAssignedTo.length()>0)
 			this.emailAssignedTo = emailAssignedTo;
 	}
-
+	
+	public static Finder<Long,TaskInfo> findTask = new Finder<Long,TaskInfo>(
+			 		    Long.class, TaskInfo.class
+			 		  );
+	
 	public boolean getDone() {
 		return done;
 	}
