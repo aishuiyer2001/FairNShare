@@ -16,9 +16,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import javax.swing.JButton;
 
 import org.h2.engine.User;
-import org.h2.expression.ExpressionList;
 
-import ch.qos.logback.core.joran.action.NewRuleAction;
 import ch.qos.logback.core.joran.action.ActionUtil.Scope;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -59,6 +57,19 @@ public class Application extends Controller {
 		return ok(views.html.dashboard.render("Welcome " + user));
 	}
 
+	
+	
+	
+	public static Result changeCalendar() throws ParseException{
+		DynamicForm requestData = Form.form().bindFromRequest(); 
+		String date = requestData.get("calendar");
+		session("fairdate", date);
+		String datenew= session("fairdate");
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		Date newdate = dateFormat.parse(datenew); 
+		return ok(views.html.dashboard.render("WELCOME"));
+		//redirectDashBoardURL();
+	}
 	public static Result addPerson() {
 
 		Person person=Form.form(Person.class).bindFromRequest().get();
@@ -67,6 +78,45 @@ public class Application extends Controller {
 	}
 
 
+	private static String getStartDate(String startDate, int count, String recurringType) throws ParseException
+	{
+		Calendar c = Calendar.getInstance();		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");	//Formatting from String to Date data type
+
+		Date date = sdf.parse(startDate);
+		c.setTime(date);
+
+		if(recurringType.equals("weekly"))
+			c.add(Calendar.DATE, 7*count);
+
+		else if(recurringType.equals("monthly"))
+			c.add(Calendar.DATE, 30*count);
+
+		return sdf.format(c.getTime());
+
+	}
+
+	
+/* 	private static String getEndDate(String startDate, String recurringType) throws ParseException 
+	{
+
+		Calendar c = Calendar.getInstance();		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");	//Formatting from String to Date data type
+
+		Date date = sdf.parse(startDate);
+		c.setTime(date);
+
+		if(recurringType.equals("weekly"))
+			c.add(Calendar.DATE, 6);
+
+		else if(recurringType.equals("monthly"))
+			c.add(Calendar.DATE, 29);
+
+		return sdf.format(c.getTime());
+	} */
+
+
+	
 
 	public static Result createTask() throws ParseException
 	{
@@ -84,7 +134,31 @@ public class Application extends Controller {
 			return ok(views.html.dashboard.render("Task could not be created. Email to assign does not exist in the database"));
 
 		newTask.setStartDate(requestData.get("startDate"));
-		newTask.setEndDate(requestData.get("endDate"));
+		int days=0;
+		
+		String ending_in = requestData.get("enddays");
+		if(ending_in.equals("")){
+			days = 0;
+		}
+		else{
+			days = Integer.parseInt(ending_in);
+		}
+		
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		Date start_date = dateFormat.parse(requestData.get("startDate"));
+		Calendar c = Calendar.getInstance();
+		c.setTime(start_date);
+		String end=null;
+		System.out.println("Days" + days);
+		if(days>0)
+		{
+			c.add(Calendar.DATE, days);		//add the number of days to the start date of the task
+			end = dateFormat.format(c.getTime());
+			newTask.setEndDate(end);
+		}
+		else
+			newTask.setEndDate(requestData.get("endDate"));
+		
 		System.out.println("space"+requestData.get("recurring_type")+"denmo");
 		System.out.println("endDate : "+requestData.get("endDate"));
 
@@ -98,8 +172,8 @@ public class Application extends Controller {
 		{
 			//System.out.println("shitt");
 			newTask.setRecurring_status(true);
-			if(newTask.getStartDate()!=null)
-				newTask.setEndDate(getEndDate(newTask.getStartDate(), requestData.get("recurring_type")));
+			//if(newTask.getStartDate()!=null)
+				//newTask.setEndDate(getEndDate(newTask.getStartDate(), requestData.get("recurring_type")));
 		}
 		if(requestData.get("toggleValue").split(":")[0].equals("2"))		// reusable task	
 			TaskInfo.findTask.ref(Long.parseLong(requestData.get("toggleValue").split(":")[1])).delete();
@@ -137,7 +211,10 @@ public class Application extends Controller {
 						if(newTask.getStartDate()!=null)
 						{	
 							newRecurringTask.setStartDate(getStartDate(newTask.getStartDate(),i+1,requestData.get("recurring_type")));
-							newRecurringTask.setEndDate(getEndDate(newRecurringTask.getStartDate(),requestData.get("recurring_type")));
+							if(days == 0)
+								newRecurringTask.setEndDate(getStartDate(newTask.getEndDate(),i+1,requestData.get("recurring_type")));
+							else
+								newRecurringTask.setEndDate(getEndDate(newRecurringTask.getStartDate(),days));
 						}
 						newRecurringTask.save();
 					}
@@ -150,27 +227,8 @@ public class Application extends Controller {
 		return ok(views.html.dashboard.render(""));
 	}
 
-
-	private static String getEndDate(String startDate, String recurringType) throws ParseException 
-	{
-
-		Calendar c = Calendar.getInstance();		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");	//Formatting from String to Date data type
-
-		Date date = sdf.parse(startDate);
-		c.setTime(date);
-
-		if(recurringType.equals("weekly"))
-			c.add(Calendar.DATE, 6);
-
-		else if(recurringType.equals("monthly"))
-			c.add(Calendar.DATE, 29);
-
-		return sdf.format(c.getTime());
-	}
-
-
-	private static String getStartDate(String startDate, int count, String recurringType) throws ParseException
+	
+	private static String getEndDate(String startDate, int days) throws ParseException
 	{
 		Calendar c = Calendar.getInstance();		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");	//Formatting from String to Date data type
@@ -178,16 +236,11 @@ public class Application extends Controller {
 		Date date = sdf.parse(startDate);
 		c.setTime(date);
 
-		if(recurringType.equals("weekly"))
-			c.add(Calendar.DATE, 7*count);
-
-		else if(recurringType.equals("monthly"))
-			c.add(Calendar.DATE, 30*count);
+		c.add(Calendar.DATE, days);
 
 		return sdf.format(c.getTime());
-
 	}
-
+	
 
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -226,35 +279,67 @@ public class Application extends Controller {
 		return ok(toJson(myTasks));															//list myTasks is sent as a json object
 	}
 
+	
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-
-	public static Result taskUpdate(String taskID) {											//method to update task which is incomplete, to assign it to the user himself
-		//TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
+	public static Result showMyIncompleteTasks(){  													//method to show only user tasks in the system, i.e, only tasks assigned to the particular user
+		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();			//extracting all tasks from the ddatabase into a list
+		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));
+		List<TaskInfo> myTasks = new ArrayList<TaskInfo>();									//creating an empty list of the type object TaskInfo
+		String usermail = session("connectedmail");											//getting the current session email of the current user
+		for(TaskInfo eachTask:tasks)														//for each task in the list of tasks
+		{	
+			if(eachTask.getEmailAssignedTo().equalsIgnoreCase(currentUser.getEmail()) && eachTask.getDone()==false)		//the email to which the task is assigned is checked with the current session email
+				myTasks.add(eachTask);														//if they are equal, the task is added to the mist myTasks
+		}
+		return ok(toJson(myTasks));															//list myTasks is sent as a json object
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	
+	public static Result taskUpdate(String taskID) {										//method to update task which is incomplete, to assign it to the user himself
 		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
 
 		TaskInfo allTasks = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
 
-		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();
-
-		for(TaskInfo t: tasks)
-		{   
-			double points=allTasks.getnewPoints();
-			allTasks.setOldPoints(points);
+		String usermail = session("connectedmail"); 										//getting the current email session of the user
+		double points=existingTask.getnewPoints();
+		
+		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();			//get all the tasks in the table TaskInfo
+		int count=0;																		//Check if the task is not assigned to the user & check if the flag assigned to false to get the
+																							//get the count of tasks that has to be assigned to someone
+		
+		for(TaskInfo t: tasks)																
+		{  
+			if(t.getAssigned()==false)
+			{
+				if(t.getEmailAssignedTo()!=null && usermail.contentEquals(t.getEmailAssignedTo()))
+				{
+				}
+				else
+				{
+					count++;
+				}
+			}
 		}
-
-
-		//TaskInfo pointsList = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(existingTask.getnewPoints());
-		existingTask.setAssigned(true);
+																					//if there is only 1 task as incomplete and to be taken, then don't alter the points
+		if(count<=1)
+		{
+			existingTask.setEmailAssignedTo(usermail);								//changing the email task assigned to, to the current user
+			existingTask.setOldPoints(points);
+			existingTask.save();													//Save the only task to to the user who selects without altering the points as it is the last task
+			return ok(views.html.dashboard.render(""));
+		}
+	
+		existingTask.setAssigned(true);												//Set the 'assigned' flag to true to check the task and alter the points (reduce for selected task) 
 		existingTask.save();
-
 		double sumOfAllUnassignedTasks = 0;
 		int noOfTasks= tasks.size();
-
-		for(TaskInfo t: tasks)
+		
+		for(TaskInfo t: tasks)														//calculate the sum of all UnAssigned tasks for the formula
 		{   
 			if(t.getAssigned())
 			{
-
 			}
 			else
 			{
@@ -262,81 +347,39 @@ public class Application extends Controller {
 			}
 		}
 
-
-		System.out.println("taskID"+taskID);
-		String usermail = session("connectedmail"); 							//getting the current email session of the user
-		existingTask.setEmailAssignedTo(usermail);								//changing the email task assigned to, to the current user
-
+		existingTask.setEmailAssignedTo(usermail);									//changing the email task assigned to, to the current user
 		double chosenTaskPoints = existingTask.getnewPoints();
-
+		existingTask.setOldPoints(points);											//copy the new points to old points table to assign the selected points for the user & not the altered
 		double sumOfUnchosenTasks = sumOfAllUnassignedTasks - chosenTaskPoints;
 		double totalDelta=(double) (chosenTaskPoints * 0.2);
-
 		double individualDeltaForTaskX =totalDelta/(sumOfUnchosenTasks);
 		double newPointValueofChosenTask = chosenTaskPoints-totalDelta;
-
-		existingTask.setNewPoints(newPointValueofChosenTask);
+		existingTask.setNewPoints(newPointValueofChosenTask);						//set the new points of the current task by reducing it by 20% (changeable)
 		existingTask.save();	
-
-
 		for(TaskInfo t: tasks)
 		{	
 
 			long idOfList= t.getTaskID();
 			int idOfList1 = (int)idOfList;
-			//long l=Long.parseLong(taskID);
 			long idOfselectedTask=Integer.parseInt(taskID);
-
-			//return ok(toJson(l));
-
-			if(idOfList1 != idOfselectedTask)
+			if(idOfList1 != idOfselectedTask)										//to alter points for the unselected incomplete tasks
 			{
-
 				TaskInfo cTask= (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(idOfList1);
-
 				if(cTask.getAssigned())
 				{
-
 				}
 				else
 				{
 					double x=cTask.getnewPoints();
 					double newPointValueofUnchosenTask=(x/sumOfUnchosenTasks)*totalDelta;
-
-
-					double y=newPointValueofUnchosenTask+x;
-					//double newPointValueofUnchosenTask=x+totalDelta *x;
-					//return ok(toJson(y));
-					//return ok(toJson(cTask.getTitle()));
-
-
+					double y=newPointValueofUnchosenTask+x;							//Alter the points based on the auto adjust & increase by the percentage based on the formula 
 					cTask.setNewPoints(y);
 					cTask.save();	
 				}
-
 			}
-
-
-
 		}
-
-
-
-
-		//return ok(toJson(newPointValueofChosenTask)); 
-
-		//return ok(toJson(existingTask));	
-
-		//existingTask.save();													//saving the entry for the task in database
-
-		//return ok(views.html.dashboard.render(""));
-
-		return ok();
-
-
-	}
-
-
+		return ok(views.html.dashboard.render(""));	
+}
 	/*
 	 * Gives the points needed by a user to be doing fair share of work
 	 * 
@@ -446,20 +489,64 @@ public class Application extends Controller {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 
 
-	public static Result showIncompleteTasks()	{    									//to show incomplete tasks out of the whole list of tasks
+	public static Result showIncompleteTasks()	{ 
+		System.out.println("inside here");//to show incomplete tasks out of the whole list of tasks
 		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();  		//list with all the tasks
 		List<TaskInfo> incompleteTasks = new ArrayList<TaskInfo>();  					 //empty list taken as array for purpose
-		for(TaskInfo eachTask : Tasks)  																//for each task in the list of all tasks,
-			if(!eachTask.getDone() &&  eachTask.getEmailAssignedTo()!=null && !eachTask.getEmailAssignedTo().equalsIgnoreCase(session("connectedmail")))			//if the status of the task is not done,
-				incompleteTasks.add(eachTask);											    	//that task is added to the incompleteTasks list
+		for(TaskInfo eachTask : Tasks)  
+		{
+			System.out.println("inside here" + eachTask);//for each task in the list of all tasks,
+		
+			if(eachTask.getDone()==false &&  (eachTask.getEmailAssignedTo()==null || !eachTask.getEmailAssignedTo().equalsIgnoreCase(session("connectedmail"))))			//if the status of the task is not done,
+				incompleteTasks.add(eachTask);
+		}
+		System.out.println("size"+incompleteTasks.size());//that task is added to the incompleteTasks list
 		return ok(toJson(incompleteTasks));										//the incompleteTasks list with all the tasks in a list is sent as Json Object
 
 	}
+	
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 
+	public static Result showAllOverdueTasks() throws ParseException	{
+		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();			//taking list of all existing tasks
+		List<TaskInfo> overdueTasks = new ArrayList<TaskInfo>();		//a new list to add each overdue task to
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");		//specifying the date format to be followed
+		String date1=session("fairdate");
+		Date date_change = dateFormat.parse(date1);
+		//a new Date object gives us the current system time
+		String enddate_string;	//string to take end date in
+		for(TaskInfo eachTask : Tasks){			//for each task in the list of tasks
+			enddate_string = eachTask.getEndDate();	//getting the end date of the task
+			Date date2 = dateFormat.parse(enddate_string);		//converting the end date string into required date format
+			if(date_change.after(date2) && eachTask.getDone()==false)			//if currrent date is after the end date of tasks
+				overdueTasks.add(eachTask);		//add that task to list of overdue tasks
+		}
+		return ok(toJson(overdueTasks));		//return overdue tasks */
+	}
 
-
-
-
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static Result showMyOverdueTasks() throws ParseException	{
+		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();			//taking list of all existing tasks
+		List<TaskInfo> overdueTasks = new ArrayList<TaskInfo>();		//a new list to add each overdue task to
+		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));
+		String usermail = session("connectedmail");
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");		//specifying the date format to be followed
+		String date1=session("fairdate");
+		Date date_change = dateFormat.parse(date1);
+		//a new Date object gives us the current system time
+		String enddate_string;	//string to take end date in
+		for(TaskInfo eachTask : Tasks){			//for each task in the list of tasks
+			enddate_string = eachTask.getEndDate();		//getting the end date of the task
+			Date date2 = dateFormat.parse(enddate_string);		//converting the end date string into required date format
+			if(date_change.after(date2) && eachTask.getEmailAssignedTo().equalsIgnoreCase(currentUser.getEmail())  && eachTask.getDone()==false)			//if currrent date is after the end date of tasks
+				overdueTasks.add(eachTask);		//add that task to list of overdue tasks
+				//the email to which the task is assigned is checked with the current session email
+				//if they are equal, the task is added to the list of the user's overdue tasks
+		}
+		return ok(toJson(overdueTasks));		//return overdue tasks
+	}
+	
 
 	@SuppressWarnings("unchecked")
 
@@ -468,13 +555,17 @@ public class Application extends Controller {
 		Login loginInfo=Form.form(Login.class).bindFromRequest().get();		
 		@SuppressWarnings("rawtypes")
 		Person existingPerson = (Person) new Model.Finder(String.class,Person.class).byId(loginInfo.getEmail());
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		Date dateObj = new Date();
+		String date = (String) df.format(dateObj);
 		if(existingPerson!=null && existingPerson.getPassword().equals(loginInfo.getPassword()))		//if there exists a person, and the password matches,
 		{	
 
 			String username=existingPerson.getFname(); 			//Get the First name by using the primary key email
 			String usermail=existingPerson.getEmail(); 			//Get the email id of the user & set in the session variable to use for other activities
 			session("connected", username);						//Assign it to the session variable
-			session("connectedmail", usermail);	
+			session("connectedmail", usermail);
+			session("fairdate", date);
 			String user = session("connected");
 
 

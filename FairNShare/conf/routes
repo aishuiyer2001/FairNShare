@@ -6,6 +6,8 @@
 GET     /                         controllers.Application.index()
 POST	/person						controllers.Application.addPerson()
 
+POST	/calendar					controllers.Application.changeCalendar()
+
 POST    /dashboard					controllers.Application.checkPerson()
 GET		/getPointsToComplete		controllers.Application.getPointsToComplete()
 GET    /showFriends			        controllers.Application.showFriends()
@@ -16,10 +18,14 @@ GET     /showFriends			    controllers.Application.showFriends()
 POST   /createTask	        controllers.Application.createTask()
 GET		/getPointsToComplete		controllers.Application.getPointsToComplete()
 GET		/showIncompleteTasks		controllers.Application.showIncompleteTasks()
+GET		/showAllOverdueTasks		controllers.Application.showAllOverdueTasks()
+GET		/showMyOverdueTasks			controllers.Application.showMyOverdueTasks()
 POST    /taskUpdate/:taskID			controllers.Application.taskUpdate(taskID)
 GET     /showMyTasks				controllers.Application.showMyTasks()
+GET 	/showMyIncompleteTasks		controllers.Application.showMyIncompleteTasks()
 #GET    /*name						controllers.Application.endSession(name)
 GET     /enteredText/:data			controllers.Application.checkIfReusable(data)
+
 
 # on clicking the url of dashboard
 GET    /dashboard                  controllers.Application.redirectDashBoardURL()
