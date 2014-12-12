@@ -3,16 +3,17 @@
 # ~~~~
 
 # Home page
-GET     /                         	controllers.Application.index()
+GET     /                         controllers.Application.index()
 POST	/person						controllers.Application.addPerson()
 GET		/calendar					controllers.Application.calendar()
 POST	/calendar					controllers.Application.changeCalendar()
+
 POST    /dashboard					controllers.Application.checkPerson()
 GET		/getPointsToComplete		controllers.Application.getPointsToComplete()
-GET     /showFriends			    controllers.Application.showFriends()
+GET    /showFriends			        controllers.Application.showFriends()
 POST    /createTask			        controllers.Application.createTask()
-GET     /showTasks			        controllers.Application.showTasks()
-GET     /logout					    controllers.Application.endSession()
+GET    /showTasks			        controllers.Application.showTasks()
+GET    /logout					controllers.Application.endSession()
 GET     /showFriends			    controllers.Application.showFriends()
 POST    /createTask			        controllers.Application.createTask()
 GET     /showTasks			        controllers.Application.showTasks()
@@ -20,16 +21,15 @@ GET		/getPointsToComplete		controllers.Application.getPointsToComplete()
 GET		/showIncompleteTasks		controllers.Application.showIncompleteTasks()
 GET		/showAllOverdueTasks		controllers.Application.showAllOverdueTasks()
 GET		/showMyOverdueTasks			controllers.Application.showMyOverdueTasks()
-GET		/showReUsableTasks			controllers.Application.showReUsableTasks()
 POST    /taskUpdate/:taskID			controllers.Application.taskUpdate(taskID)
 GET     /showMyTasks				controllers.Application.showMyTasks()
 GET 	/showMyIncompleteTasks		controllers.Application.showMyIncompleteTasks()
 #GET    /*name						controllers.Application.endSession(name)
 
+
 # on clicking the url of dashboard
-GET    /dashboard                 	controllers.Application.redirectDashBoardURL()
-POST	/personUpdate/:taskID		controllers.Application.personUpdate(taskID)
-POST	/reusetaskUpdate/:taskID	controllers.Application.personUpdate(taskID)
+GET    /dashboard                  controllers.Application.redirectDashBoardURL()
+POST	/personUpdate/:taskID			controllers.Application.personUpdate(taskID)
 GET     /showMyRecurringTasks       controllers.Application.showMyRecurringTasks()
 
 # Map static resources from the /public folder to the /assets URL path
