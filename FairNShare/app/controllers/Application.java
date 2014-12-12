@@ -83,6 +83,8 @@ import static play.libs.Json.toJson;
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		DynamicForm requestData = Form.form().bindFromRequest();
 		String recurring_type = requestData.get("recurring_type");
+		String newpoints=requestData.get("newPoints");
+		double points = Double.parseDouble(newpoints);
 		int recurring_countNumber;
 		int days=0;
 		String recurring_count = requestData.get("taskCount");
@@ -103,12 +105,14 @@ import static play.libs.Json.toJson;
 			c.add(Calendar.DATE, days);		//add the number of days to the start date of the task
 			end = dateFormat.format(c.getTime());
 			newTask.setEndDate(end);		//set the added date as the end date for the task
+			newTask.setOldPoints(points);
 			newTask.save();
 			System.out.println("END DATE IN FUNCTION"+end+"\nGET TASK END DATE"+newTask.getEndDate());
 		}  
 		else
 		{
 			end=newTask.getEndDate();
+			newTask.setOldPoints(points);
 			newTask.save();
 		}
 
@@ -129,6 +133,7 @@ import static play.libs.Json.toJson;
 
 		String usermail = session("connectedmail");					//Get the user mail from session and set it to the created field in db
  		newTask.setCreatedBy(usermail);
+ 		newTask.setOldPoints(points);
  		newTask.save();
 
 
@@ -144,7 +149,7 @@ import static play.libs.Json.toJson;
 
 				for (int i = 1; i < recurring_countNumber; i++) {
 
-					Application.dbinsertREcurringTask(i, j, type_recurring, end);		//Call dbinsertREcurringTask to insert into db
+					Application.dbinsertREcurringTask(i, j, type_recurring, end,points);		//Call dbinsertREcurringTask to insert into db
 				}
 			}
 			if (recurring_type.equals("monthly")) {									//To add weekly Task
@@ -154,7 +159,7 @@ import static play.libs.Json.toJson;
 
 				for (int i = 1; i < recurring_countNumber; i++) {
 
-					Application.dbinsertREcurringTask(i, j, type_recurring,end);		//Call dbinsertREcurringTask to insert into db
+					Application.dbinsertREcurringTask(i, j, type_recurring,end,points);		//Call dbinsertREcurringTask to insert into db
 				}
 			}
 
@@ -162,6 +167,7 @@ import static play.libs.Json.toJson;
 		if (assignedToEmailFound != null
 				&& assignedToEmailFound.getEmail().equals(
 						newTask.getEmailAssignedTo())) {
+			newTask.setOldPoints(points);
 			newTask.save();
 		}
 
@@ -172,7 +178,7 @@ import static play.libs.Json.toJson;
 	}
 
 
-	public static void dbinsertREcurringTask(int i,int j,int type_recurring, String end){
+	public static void dbinsertREcurringTask(int i,int j,int type_recurring, String end,double points){
 
 		 		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
 		 		String usermail = session("connectedmail");					//Get the user mail from session and set it to the created field in db
@@ -202,6 +208,7 @@ import static play.libs.Json.toJson;
 			 			c2.add(Calendar.DATE, n); 							// Adding n=7 days
 			 			String output2 = sdf.format(c2.getTime());
 			 			newTask.setEndDate(output2);
+			 			newTask.setOldPoints(points);
 
 		 			}
 		 			if(type_recurring==1){
@@ -216,6 +223,7 @@ import static play.libs.Json.toJson;
 			 			c2.add(Calendar.MONTH, i); 							// Adding 1 month to the ith recurring task
 			 			String output2 = sdf.format(c2.getTime());
 			 			newTask.setEndDate(output2);
+			 			newTask.setOldPoints(points);
 
 		 			}
 
@@ -224,7 +232,7 @@ import static play.libs.Json.toJson;
 		 		e.printStackTrace();
 		 		}
 
-
+		 		newTask.setOldPoints(points);
 		 		newTask.save();
  		
 		 	}
@@ -553,6 +561,10 @@ import static play.libs.Json.toJson;
 		Login loginInfo=Form.form(Login.class).bindFromRequest().get();		
 		@SuppressWarnings("rawtypes")
 		Person existingPerson = (Person) new Model.Finder(String.class,Person.class).byId(loginInfo.getEmail());
+		DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+		Date dateObj = new Date();
+		String date=(String) df.format(dateObj);
+		
 		if(existingPerson!=null && existingPerson.getPassword().equals(loginInfo.getPassword()))		//if there exists a person, and the password matches,
 		{	
 
@@ -560,6 +572,7 @@ import static play.libs.Json.toJson;
 			String usermail=existingPerson.getEmail(); 			//Get the email id of the user & set in the session variable to use for other activities
 			session("connected", username);						//Assign it to the session variable
 			session("connectedmail", usermail);	
+			session("fairdate", date);	
 			String user = session("connected");
 			return ok(views.html.dashboard.render("Welcome " + user));
 		}
