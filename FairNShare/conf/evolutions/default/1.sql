@@ -7,7 +7,7 @@ create table person (
   email                     varchar(255) not null,
   fname                     varchar(255),
   lname                     varchar(255),
-  score                     integer,
+  score                     double,
   dob                       varchar(255),
   ph_no                     varchar(255),
   gender                    varchar(255),
@@ -22,10 +22,12 @@ create table task_info (
   created_by                varchar(255),
   email_assigned_to         varchar(255),
   done                      boolean,
+  assigned                  boolean,
   recurring_status          boolean,
   start_date                varchar(255),
   end_date                  varchar(255),
-  points                    integer,
+  old_points                double,
+  new_points                double,
   constraint pk_task_info primary key (task_id))
 ;
 
