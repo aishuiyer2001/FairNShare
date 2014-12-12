@@ -59,13 +59,19 @@ import static play.libs.Json.toJson;
 	
 	public static Result calendar()
 	{
-		return ok();
-		//return ok(calendar.render("CALENDAR"));
+		//return ok();
+		return ok(calendar.render("CALENDAR"));
 	}
 	
-	public static Result changeCalendar(){
-
-		return ok(views.html.dashboard.render("Welcome "));
+	public static Result changeCalendar() throws ParseException{
+		DynamicForm requestData = Form.form().bindFromRequest(); 
+		String date = requestData.get("calendar");
+		session("fairdate", date);
+		String datenew= session("fairdate");
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		Date newdate = dateFormat.parse(datenew); 
+		return ok(views.html.dashboard.render("WELCOME"));
+		//redirectDashBoardURL();
 	}
 	
 	public static Result addPerson() {
@@ -83,6 +89,8 @@ import static play.libs.Json.toJson;
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		DynamicForm requestData = Form.form().bindFromRequest();
 		String recurring_type = requestData.get("recurring_type");
+		String newpoints=requestData.get("newPoints");
+		double points = Double.parseDouble(newpoints);
 		int recurring_countNumber;
 		int days=0;
 		String recurring_count = requestData.get("taskCount");
@@ -102,13 +110,16 @@ import static play.libs.Json.toJson;
 		{
 			c.add(Calendar.DATE, days);		//add the number of days to the start date of the task
 			end = dateFormat.format(c.getTime());
-			newTask.setEndDate(end);		//set the added date as the end date for the task
+			newTask.setEndDate(end);
+			//set the added date as the end date for the task
+			newTask.setOldPoints(points);
 			newTask.save();
-			System.out.println("END DATE IN FUNCTION"+end+"\nGET TASK END DATE"+newTask.getEndDate());
+			
 		}  
 		else
 		{
 			end=newTask.getEndDate();
+			newTask.setOldPoints(points);
 			newTask.save();
 		}
 
@@ -129,6 +140,7 @@ import static play.libs.Json.toJson;
 
 		String usermail = session("connectedmail");					//Get the user mail from session and set it to the created field in db
  		newTask.setCreatedBy(usermail);
+ 		newTask.setOldPoints(points);
  		newTask.save();
 
 
@@ -144,7 +156,7 @@ import static play.libs.Json.toJson;
 
 				for (int i = 1; i < recurring_countNumber; i++) {
 
-					Application.dbinsertREcurringTask(i, j, type_recurring, end);		//Call dbinsertREcurringTask to insert into db
+					Application.dbinsertREcurringTask(i, j, type_recurring, end,points);		//Call dbinsertREcurringTask to insert into db
 				}
 			}
 			if (recurring_type.equals("monthly")) {									//To add weekly Task
@@ -154,7 +166,7 @@ import static play.libs.Json.toJson;
 
 				for (int i = 1; i < recurring_countNumber; i++) {
 
-					Application.dbinsertREcurringTask(i, j, type_recurring,end);		//Call dbinsertREcurringTask to insert into db
+					Application.dbinsertREcurringTask(i, j, type_recurring,end,points);		//Call dbinsertREcurringTask to insert into db
 				}
 			}
 
@@ -162,6 +174,7 @@ import static play.libs.Json.toJson;
 		if (assignedToEmailFound != null
 				&& assignedToEmailFound.getEmail().equals(
 						newTask.getEmailAssignedTo())) {
+			newTask.setOldPoints(points);
 			newTask.save();
 		}
 
@@ -172,7 +185,7 @@ import static play.libs.Json.toJson;
 	}
 
 
-	public static void dbinsertREcurringTask(int i,int j,int type_recurring, String end){
+	public static void dbinsertREcurringTask(int i,int j,int type_recurring, String end, double points){
 
 		 		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
 		 		String usermail = session("connectedmail");					//Get the user mail from session and set it to the created field in db
@@ -202,6 +215,7 @@ import static play.libs.Json.toJson;
 			 			c2.add(Calendar.DATE, n); 							// Adding n=7 days
 			 			String output2 = sdf.format(c2.getTime());
 			 			newTask.setEndDate(output2);
+			 			newTask.setOldPoints(points);
 
 		 			}
 		 			if(type_recurring==1){
@@ -216,6 +230,7 @@ import static play.libs.Json.toJson;
 			 			c2.add(Calendar.MONTH, i); 							// Adding 1 month to the ith recurring task
 			 			String output2 = sdf.format(c2.getTime());
 			 			newTask.setEndDate(output2);
+			 			newTask.setOldPoints(points);
 
 		 			}
 
@@ -224,7 +239,7 @@ import static play.libs.Json.toJson;
 		 		e.printStackTrace();
 		 		}
 
-
+		 		newTask.setOldPoints(points);
 		 		newTask.save();
  		
 		 	}
@@ -515,15 +530,17 @@ import static play.libs.Json.toJson;
 		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();			//taking list of all existing tasks
 		List<TaskInfo> overdueTasks = new ArrayList<TaskInfo>();		//a new list to add each overdue task to
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");		//specifying the date format to be followed
-		Date date1 = new Date();	//a new Date object gives us the current system time
+		String date1=session("fairdate");
+		Date date_change = dateFormat.parse(date1);
+		//a new Date object gives us the current system time
 		String enddate_string;	//string to take end date in
 		for(TaskInfo eachTask : Tasks){			//for each task in the list of tasks
 			enddate_string = eachTask.getEndDate();	//getting the end date of the task
 			Date date2 = dateFormat.parse(enddate_string);		//converting the end date string into required date format
-			if(date1.after(date2) && eachTask.getDone()==false)			//if currrent date is after the end date of tasks
+			if(date_change.after(date2) && eachTask.getDone()==false)			//if currrent date is after the end date of tasks
 				overdueTasks.add(eachTask);		//add that task to list of overdue tasks
 		}
-		return ok(toJson(overdueTasks));		//return overdue tasks
+		return ok(toJson(overdueTasks));		//return overdue tasks */
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -533,12 +550,14 @@ import static play.libs.Json.toJson;
 		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));
 		String usermail = session("connectedmail");
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");		//specifying the date format to be followed
-		Date date1 = new Date();	//a new Date object gives us the current system time
+		String date1=session("fairdate");
+		Date date_change = dateFormat.parse(date1);
+		//a new Date object gives us the current system time
 		String enddate_string;	//string to take end date in
 		for(TaskInfo eachTask : Tasks){			//for each task in the list of tasks
 			enddate_string = eachTask.getEndDate();		//getting the end date of the task
 			Date date2 = dateFormat.parse(enddate_string);		//converting the end date string into required date format
-			if(date1.after(date2) && eachTask.getEmailAssignedTo().equalsIgnoreCase(currentUser.getEmail())  && eachTask.getDone()==false)			//if currrent date is after the end date of tasks
+			if(date_change.after(date2) && eachTask.getEmailAssignedTo().equalsIgnoreCase(currentUser.getEmail())  && eachTask.getDone()==false)			//if currrent date is after the end date of tasks
 				overdueTasks.add(eachTask);		//add that task to list of overdue tasks
 				//the email to which the task is assigned is checked with the current session email
 				//if they are equal, the task is added to the list of the user's overdue tasks
@@ -553,13 +572,17 @@ import static play.libs.Json.toJson;
 		Login loginInfo=Form.form(Login.class).bindFromRequest().get();		
 		@SuppressWarnings("rawtypes")
 		Person existingPerson = (Person) new Model.Finder(String.class,Person.class).byId(loginInfo.getEmail());
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		Date dateObj = new Date();
+		String date = (String) df.format(dateObj);
 		if(existingPerson!=null && existingPerson.getPassword().equals(loginInfo.getPassword()))		//if there exists a person, and the password matches,
 		{	
 
 			String username=existingPerson.getFname(); 			//Get the First name by using the primary key email
 			String usermail=existingPerson.getEmail(); 			//Get the email id of the user & set in the session variable to use for other activities
 			session("connected", username);						//Assign it to the session variable
-			session("connectedmail", usermail);	
+			session("connectedmail", usermail);
+			session("fairdate", date);
 			String user = session("connected");
 			return ok(views.html.dashboard.render("Welcome " + user));
 		}

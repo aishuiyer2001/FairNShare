@@ -12,7 +12,7 @@ $(document).ready(
 
 
 
-			$("#myrecurringtask-page").click(function(){
+			$("#myRecurringtask-page").click(function(){
 				$.get("/showMyRecurringTasks",function(myRecurringTasks,status){
 					$('#friend_div').hide();
 					$('#task_incomplete').hide();
@@ -26,9 +26,9 @@ $(document).ready(
 					$('#alltask_overdue').hide();
 					$('#mytask_overdue').hide();
 					$('#task_recurring').append("<h2>Recurring Tasks</h2>");
-					$('#task_recurring').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score");
+					$('#task_recurring').html("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score</b>");
 					jQuery.each(myRecurringTasks, function(i,task) {
-						$('#task_recurring').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.newPoints.toFixed(2)+' <form role="form" action="" method=""> <input type="submit" class="btn btn-success" id="mybutton" value="Done!"></input></form></li></td></tr>');
+						$('#task_recurring').html('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.newPoints.toFixed(2)+' <form role="form" action="" method=""> <input type="submit" class="btn btn-success" id="mybutton" value="Done!"></input></form></li></td></tr>');
 						$('#task_recurring').show();
 				});
 			});
@@ -96,7 +96,7 @@ $(document).ready(
 					$('#alltask_overdue').hide();
 					$('#mytask_overdue').hide();
 					$('#task_incomplete').prepend("<h2>Incomplete Tasks</h2>");
-					$('#task_incomplete').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score");
+					$('#task_incomplete').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score</b>");
 					jQuery.each(incompleteTasks, function(i,task) {
 						$('#task_incomplete').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.newPoints.toFixed(2)+' <form id="TaskIDForm" role="form" action="/taskUpdate/'+task.taskID+'" method="POST"> <input type="submit" class="btn btn-success" id="mybutton" value="Assign it to Me!"></input></form></li></td></tr>');
 						$('#task_incomplete').show();
@@ -119,7 +119,7 @@ $(document).ready(
 					$('#task_div').hide();
 					$('#mytask_overdue').hide();
 					$('#alltask_overdue').prepend("<h2>All Overdue Tasks</h2>");
-					$('#alltask_overdue').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score");
+					$('#alltask_overdue').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score</b>");
 					jQuery.each(alloverdueTasks, function(i,task) {
 						$('#alltask_overdue').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.newPoints.toFixed(2)+'</li></td></tr>');
 						$('#alltask_overdue').show();
@@ -141,9 +141,9 @@ $(document).ready(
 					$('#task_div').hide();
 					$('#alltask_overdue').hide();
 					$('#mytask_overdue').prepend("<h2>My Overdue Tasks</h2>");
-					$('#mytask_overdue').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score");
+					$('#mytask_overdue').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score</b>");
 					jQuery.each(myoverdueTasks, function(i,task) {
-						$('#mytask_overdue').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.Points+'</li></td></tr>');
+						$('#mytask_overdue').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.newPoints.toFixed(2)+'</li></td></tr>');
 						$('#mytask_overdue').show();
 				});
 			});
