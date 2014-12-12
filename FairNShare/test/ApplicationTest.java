@@ -1,5 +1,10 @@
 
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import models.Person;
@@ -10,8 +15,10 @@ import static org.mockito.Mockito.*;
 import org.junit.*;
 
 import play.twirl.api.Content;
+import static play.libs.Json.toJson;
 import static play.test.Helpers.*;
 import static org.fest.assertions.Assertions.*;
+import play.db.ebean.Model;
 import play.mvc.Result;
 
 
@@ -53,13 +60,15 @@ public class ApplicationTest {
 
     //Unit tests to check whether routing to html templates through URL's is being done properly or not
     
-    @Test
+    @SuppressWarnings("deprecation")
+	@Test
     public void indexRouteTest() {                          //Unit test to check whether routing URL is loading properly or not
 		Result result = routeAndCall(fakeRequest(GET, "/"));//A fake request is sent to load index template
         assertThat(result).isNotNull();                     //Asserts that routing is successful and not null
     }
     
-    @Test
+    @SuppressWarnings("deprecation")
+	  @Test
     public void dashboardRouteTest() {                      //Performs the same test as indexRouteTest for dashboard template
         Result result = routeAndCall(fakeRequest(GET, "/dashboard"));
         assertThat(result).isNotNull();
@@ -109,6 +118,60 @@ public class ApplicationTest {
  	   assertEquals("cuttingvegetables",task2.getTitle());
  	   assertEquals("groceryshopping",task3.getTitle());
  	 }
-      
-   
-   }
+    
+    //Unit tests to check whether routing to html templates through URL's is being done properly or not
+
+    @Test
+    public void showAllOverdueTasksRouteTest() {                          //Unit test to check whether routing URL is loading properly or not
+		Result result = routeAndCall(fakeRequest(GET, "/showAllOverdueTasks"));//A fake request is sent to load index template
+        assertThat(result).isNotNull();                     //Asserts that routing is successful and not null
+    }
+    
+    
+    //Unit test to check whether overdue tasks of group of users are being displayed or not
+    @Test
+    public void  showAllOverdueTasksTest() throws ParseException{
+		TaskInfo task = mock(TaskInfo.class);	 //A mock is created to eliminate the need for an external data resource for testing
+		when(task.getTitle()).thenReturn("cuttingvegetables");  
+        List<TaskInfo> overdueTasks = new ArrayList<TaskInfo>();  //A new list to store the overdue tasks list
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); 
+        when(task.getEndDate()).thenReturn("2014-11-13");	//The task's due date is fetched from database	
+		Date date1 = dateFormat.parse("2014-11-15");	// The current system date is obtained
+		String enddate_string;	
+		enddate_string = task.getEndDate();		
+		Date date2 = dateFormat.parse(enddate_string);		//Converting the end date string into required date format
+		if(date1.after(date2) && task.getDone()==false)	//Check if current date is after the end date of tasks
+		overdueTasks.add(task);		//If task is an overdue task, add it to the array list
+		assertEquals("cuttingvegetables",overdueTasks.get(0));//Check value 
+		verify(overdueTasks.get(0));//Check contents of array list 
+	  }
+
+    //Unit tests to check whether routing to html templates through URL's is being done properly or not
+    @Test
+    public void showMyOverdueTasksRouteTest() {                          //Unit test to check whether routing URL is loading properly or not
+		Result result = routeAndCall(fakeRequest(GET, "/showMyOverdueTasks"));//A fake request is sent to load index template
+        assertThat(result).isNotNull();                     //Asserts that routing is successful and not null
+    }
+    
+    
+   //Unit test to check whether overdue tasks for every individual member of the group are being displayed or not
+    @Test
+    public void showMyOverdueTasksTest() throws ParseException{
+		TaskInfo task =  mock(TaskInfo.class);	    //A mock is created to eliminate the need for an external data resource for testing
+		when(task.getTitle()).thenReturn("cleaningutensils");
+		List<TaskInfo> overdueTasks = new ArrayList<TaskInfo>();//A new list to store the overdue tasks list		
+	    Person person = mock(Person.class);                     
+	 	when(person.getEmail()).thenReturn("email@gmail.com");	//user's email is obtained from database
+	 	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); 
+        when(task.getEndDate()).thenReturn("2014-11-10");	//The task's due date is fetched from database	
+		Date date1 = dateFormat.parse("2014-11-12");	// The current system date is obtained 
+		String enddate_string;	
+		enddate_string = task.getEndDate();		
+		Date date2 = dateFormat.parse(enddate_string);	//Converting the end date string into required date format	
+		if(date1.after(date2) && task.getEmailAssignedTo().equals(person.getEmail()) && task.getDone()==false)	//check whether the task is overdue task or not based on date
+		overdueTasks.add(task);	//If task is an overdue task, add it to the array list 
+		assertEquals("cleaningutensils",overdueTasks.get(0));//Check value
+		verify(overdueTasks.get(0));//Check contents of array list
+	  }
+    }
+
