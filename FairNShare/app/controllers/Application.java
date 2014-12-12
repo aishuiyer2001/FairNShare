@@ -60,7 +60,6 @@ import static play.libs.Json.toJson;
 	public static Result calendar()
 	{
 		return ok();
-		//return ok(calendar.render("CALENDAR"));
 	}
 	
 	public static Result changeCalendar(){
