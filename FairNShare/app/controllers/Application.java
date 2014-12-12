@@ -1,5 +1,6 @@
 package controllers;
 import views.html.*;
+
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.text.ParseException;
@@ -8,12 +9,18 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import javax.swing.JButton;
+
 import org.h2.engine.User;
+
 import ch.qos.logback.core.joran.action.ActionUtil.Scope;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sun.java.swing.plaf.windows.WindowsBorders.DashedBorder;
+
 import models.Person;
 import models.TaskInfo;
 import play.*;
@@ -25,7 +32,6 @@ import play.libs.Json;
 import play.mvc.*;
 import play.mvc.Http.Context;
 import play.mvc.Http.Session;
-
 import static play.libs.Json.toJson;
 
 @SuppressWarnings("unused")
@@ -188,7 +194,7 @@ import static play.libs.Json.toJson;
  		
 		 	}
 
-	
+
 
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -229,34 +235,52 @@ import static play.libs.Json.toJson;
 		return ok(toJson(myTasks));															//list myTasks is sent as a json object
 	}
 	
+	
+	
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	
-	public static Result taskUpdate(String taskID) {											//method to update task which is incomplete, to assign it to the user himself
-		//TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
+	public static Result taskUpdate(String taskID) {										//method to update task which is incomplete, to assign it to the user himself
 		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
 		TaskInfo allTasks = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
+		String usermail = session("connectedmail"); 										//getting the current email session of the user
+		double points=existingTask.getnewPoints();
 		
-		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();
+		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();			//get all the tasks in the table TaskInfo
+		int count=0;																		//Check if the task is not assigned to the user & check if the flag assigned to false to get the
+																							//get the count of tasks that has to be assigned to someone
 		
-		for(TaskInfo t: tasks)
-		{   
-			double points=allTasks.getnewPoints();
-			allTasks.setOldPoints(points);
+		for(TaskInfo t: tasks)																
+		{  
+			if(t.getAssigned()==false)
+			{
+				if(usermail.contentEquals(t.getEmailAssignedTo()))
+				{
+				}
+				else
+				{
+					count++;
+				}
+			}
 		}
-		
-		
-		//TaskInfo pointsList = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(existingTask.getnewPoints());
-		existingTask.setAssigned(true);
+																					//if there is only 1 task as incomplete and to be taken, then don't alter the points
+		if(count<=1)
+		{
+			existingTask.setEmailAssignedTo(usermail);								//changing the email task assigned to, to the current user
+			existingTask.setOldPoints(points);
+			existingTask.save();													//Save the only task to to the user who selects without altering the points as it is the last task
+			return ok(views.html.dashboard.render(""));
+		}
+	
+		existingTask.setAssigned(true);												//Set the 'assigned' flag to true to check the task and alter the points (reduce for selected task) 
 		existingTask.save();
-		
 		double sumOfAllUnassignedTasks = 0;
 		int noOfTasks= tasks.size();
 		
-		for(TaskInfo t: tasks)
+		for(TaskInfo t: tasks)														//calculate the sum of all UnAssigned tasks for the formula
 		{   
 			if(t.getAssigned())
 			{
-				
 			}
 			else
 			{
@@ -264,87 +288,40 @@ import static play.libs.Json.toJson;
 			}
 		}
 		
-		
-		System.out.println("taskID"+taskID);
-		String usermail = session("connectedmail"); 							//getting the current email session of the user
-		existingTask.setEmailAssignedTo(usermail);								//changing the email task assigned to, to the current user
-		
+		existingTask.setEmailAssignedTo(usermail);									//changing the email task assigned to, to the current user
 		double chosenTaskPoints = existingTask.getnewPoints();
-		
+		existingTask.setOldPoints(points);											//copy the new points to old points table to assign the selected points for the user & not the altered
 		double sumOfUnchosenTasks = sumOfAllUnassignedTasks - chosenTaskPoints;
 		double totalDelta=(double) (chosenTaskPoints * 0.2);
-		
 		double individualDeltaForTaskX =totalDelta/(sumOfUnchosenTasks);
 		double newPointValueofChosenTask = chosenTaskPoints-totalDelta;
-		
-		existingTask.setNewPoints(newPointValueofChosenTask);
+		existingTask.setNewPoints(newPointValueofChosenTask);						//set the new points of the current task by reducing it by 20% (changeable)
 		existingTask.save();	
-		
-		
 		for(TaskInfo t: tasks)
 		{	
-			
 			long idOfList= t.getTaskID();
 			int idOfList1 = (int)idOfList;
-			//long l=Long.parseLong(taskID);
 			long idOfselectedTask=Integer.parseInt(taskID);
-			
-			//return ok(toJson(l));
-			
-			if(idOfList1 != idOfselectedTask)
+			if(idOfList1 != idOfselectedTask)										//to alter points for the unselected incomplete tasks
 			{
-			
 				TaskInfo cTask= (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(idOfList1);
-				
 				if(cTask.getAssigned())
 				{
-					
 				}
 				else
 				{
 					double x=cTask.getnewPoints();
 					double newPointValueofUnchosenTask=(x/sumOfUnchosenTasks)*totalDelta;
-					
-					
-					double y=newPointValueofUnchosenTask+x;
-					//double newPointValueofUnchosenTask=x+totalDelta *x;
-					//return ok(toJson(y));
-					//return ok(toJson(cTask.getTitle()));
-	
-		
+					double y=newPointValueofUnchosenTask+x;							//Alter the points based on the auto adjust & increase by the percentage based on the formula 
 					cTask.setNewPoints(y);
 					cTask.save();	
 				}
-				
 			}
-			
-		
-			
 		}
-		
-		
-		
-		
-		//return ok(toJson(newPointValueofChosenTask)); 
-		
-		//return ok(toJson(existingTask));	
-		
-		//existingTask.save();													//saving the entry for the task in database
-
-		//return ok(views.html.dashboard.render(""));
-		 
-		return ok();
-
-		
+		return ok(views.html.dashboard.render(""));	
 }
 
-	public static Result autoAdjust(String taskID) {
-		
-		
-		return ok();
-		
-	}
-
+	
 	/*
 	 * Gives the points needed by a user to be doing fair share of work
 	 * 
