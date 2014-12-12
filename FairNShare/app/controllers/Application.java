@@ -3,6 +3,7 @@ import views.html.*;
 
 import java.awt.Window;
 import java.awt.event.WindowEvent;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,6 +57,17 @@ import static play.libs.Json.toJson;
 		return ok(views.html.dashboard.render("Welcome " + user));
 	}
 	
+	public static Result calendar()
+	{
+		return ok();
+		//return ok(calendar.render("CALENDAR"));
+	}
+	
+	public static Result changeCalendar(){
+
+		return ok(views.html.dashboard.render("Welcome "));
+	}
+	
 	public static Result addPerson() {
 
 		Person person=Form.form(Person.class).bindFromRequest().get();
@@ -64,45 +76,65 @@ import static play.libs.Json.toJson;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static Result createTask() {
+	public static Result createTask() throws Exception {
 
 		TaskInfo newTask = Form.form(TaskInfo.class).bindFromRequest().get();
-	
 
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		DynamicForm requestData = Form.form().bindFromRequest();
 		String recurring_type = requestData.get("recurring_type");
 		int recurring_countNumber;
+		int days=0;
 		String recurring_count = requestData.get("taskCount");
-	
-		
+		String ending_in = requestData.get("enddays");
+		if(ending_in.equals("")){
+		days = 0;
+		}
+		else{
+			days = Integer.parseInt(ending_in);
+		}
+
+		Date start_date = dateFormat.parse(newTask.getStartDate());  //get the starting date
+		Calendar c = Calendar.getInstance();
+		c.setTime(start_date);
+		String end=null;
+		if(newTask.getEndDate()==null && days>0)		//if the number of days are specified
+		{
+			c.add(Calendar.DATE, days);		//add the number of days to the start date of the task
+			end = dateFormat.format(c.getTime());
+			newTask.setEndDate(end);		//set the added date as the end date for the task
+			newTask.save();
+			System.out.println("END DATE IN FUNCTION"+end+"\nGET TASK END DATE"+newTask.getEndDate());
+		}  
+		else
+		{
+			end=newTask.getEndDate();
+			newTask.save();
+		}
+
 		if(recurring_count.equals("")){
-	
+
 			recurring_count="1";
 			recurring_countNumber = Integer.parseInt(recurring_count);
-	
+
 		}
 		else{
 			recurring_countNumber = Integer.parseInt(recurring_count);
+
 		}
-	
-		
+
+
 		Person assignedToEmailFound = (Person) new Model.Finder(String.class,
 				Person.class).byId(newTask.getEmailAssignedTo());
 
-		if (assignedToEmailFound != null
-				&& assignedToEmailFound.getEmail().equals(
-						newTask.getEmailAssignedTo())) {
-			String usermail = session("connectedmail"); // Get the user mail from session and set it to the created field in db
-			newTask.setCreatedBy(usermail);
-			newTask.save();
-			//return ok(toJson(newTask));	
+		String usermail = session("connectedmail");					//Get the user mail from session and set it to the created field in db
+ 		newTask.setCreatedBy(usermail);
+ 		newTask.save();
 
-		}
 
-		
 		 //Check if the task is recurring and add it into db based on weekly or monthly basis with number of tasks to be added given by user
-		 
-		
+
+
 		if (newTask.isRecurring_status()) {
 
 			if (recurring_type.equals("weekly")) {									//To add weekly Task
@@ -112,7 +144,7 @@ import static play.libs.Json.toJson;
 
 				for (int i = 1; i < recurring_countNumber; i++) {
 
-					Application.dbinsertREcurringTask(i, j, type_recurring);		//Call dbinsertREcurringTask to insert into db
+					Application.dbinsertREcurringTask(i, j, type_recurring, end);		//Call dbinsertREcurringTask to insert into db
 				}
 			}
 			if (recurring_type.equals("monthly")) {									//To add weekly Task
@@ -122,7 +154,7 @@ import static play.libs.Json.toJson;
 
 				for (int i = 1; i < recurring_countNumber; i++) {
 
-					Application.dbinsertREcurringTask(i, j, type_recurring);		//Call dbinsertREcurringTask to insert into db
+					Application.dbinsertREcurringTask(i, j, type_recurring,end);		//Call dbinsertREcurringTask to insert into db
 				}
 			}
 
@@ -133,25 +165,28 @@ import static play.libs.Json.toJson;
 			newTask.save();
 		}
 
+
+
 		return ok(views.html.dashboard.render(""));
 
 	}
-	
-	
-	public static void dbinsertREcurringTask(int i,int j,int type_recurring){
-		 		
+
+
+	public static void dbinsertREcurringTask(int i,int j,int type_recurring, String end){
+
 		 		TaskInfo newTask=Form.form(TaskInfo.class).bindFromRequest().get();
 		 		String usermail = session("connectedmail");					//Get the user mail from session and set it to the created field in db
 		 		newTask.setCreatedBy(usermail);
 		 		int n=j*i;													//generate value of recurring tasks using the loop to add i number of times in db
 		 		String startdate= newTask.getStartDate();					//Get the start and end date from the db
-		 		String enddate= newTask.getEndDate();
+		 		String enddate= end;
+		 		System.out.println(enddate);
 		 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");	//Formatting from String to Date data type
-		 		
+
 		 		String dateInString_StartDate=startdate;
 		 		String dateInString_EndDate=enddate;
-		 		
-		 		
+
+
 		 		try {
 		 			Date date1 = sdf.parse(dateInString_StartDate);
 		 			Date date2 = sdf.parse(dateInString_EndDate);
@@ -161,13 +196,13 @@ import static play.libs.Json.toJson;
 			 			c1.add(Calendar.DATE, n); 							// Adding n = 7 days if weekly or or n=30*no of times the user has requested to insert
 			 			String output = sdf.format(c1.getTime());
 			 			newTask.setStartDate(output);
-			 			
+
 			 			Calendar c2 = Calendar.getInstance();
 			 			c2.setTime(date2); 									// Now use the retrieved end date.
 			 			c2.add(Calendar.DATE, n); 							// Adding n=7 days
 			 			String output2 = sdf.format(c2.getTime());
 			 			newTask.setEndDate(output2);
-		 				
+
 		 			}
 		 			if(type_recurring==1){
 		 				Calendar c1 = Calendar.getInstance();
@@ -175,25 +210,27 @@ import static play.libs.Json.toJson;
 			 			c1.add(Calendar.MONTH, i); 							// Adding 1 month to the ith recurring task
 			 			String output = sdf.format(c1.getTime());
 			 			newTask.setStartDate(output);
-			 			
+
 			 			Calendar c2 = Calendar.getInstance();
 			 			c2.setTime(date2); 									// Now use the retrieved end date.
 			 			c2.add(Calendar.MONTH, i); 							// Adding 1 month to the ith recurring task
 			 			String output2 = sdf.format(c2.getTime());
 			 			newTask.setEndDate(output2);
-		 				
+
 		 			}
-	
+
 		 		} catch (ParseException e) {
-		 			
+
 		 		e.printStackTrace();
 		 		}
-		 			
-		 		
+
+
 		 		newTask.save();
  		
 		 	}
 
+
+	
 
 
 
@@ -236,7 +273,19 @@ import static play.libs.Json.toJson;
 	}
 	
 	
-	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static Result showMyIncompleteTasks(){  													//method to show only user tasks in the system, i.e, only tasks assigned to the particular user
+		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all();			//extracting all tasks from the ddatabase into a list
+		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));
+		List<TaskInfo> myTasks = new ArrayList<TaskInfo>();									//creating an empty list of the type object TaskInfo
+		String usermail = session("connectedmail");											//getting the current session email of the current user
+		for(TaskInfo eachTask:tasks)														//for each task in the list of tasks
+		{	
+			if(eachTask.getEmailAssignedTo().equalsIgnoreCase(currentUser.getEmail()) && eachTask.getDone()==false)		//the email to which the task is assigned is checked with the current session email
+				myTasks.add(eachTask);														//if they are equal, the task is added to the mist myTasks
+		}
+		return ok(toJson(myTasks));															//list myTasks is sent as a json object
+	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	
@@ -439,7 +488,7 @@ import static play.libs.Json.toJson;
 		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();  		//list with all the tasks
 		List<TaskInfo> incompleteTasks = new ArrayList<TaskInfo>();  					 //empty list taken as array for purpose
 		for(TaskInfo eachTask : Tasks)  																//for each task in the list of all tasks,
-		if(!eachTask.getDone() &&  !eachTask.getEmailAssignedTo().equalsIgnoreCase(session("connectedmail")))			//if the status of the task is not done,
+		if(eachTask.getDone()==false &&  !eachTask.getEmailAssignedTo().equalsIgnoreCase(session("connectedmail")))			//if the status of the task is not done,
 			incompleteTasks.add(eachTask);											    	//that task is added to the incompleteTasks list
 		return ok(toJson(incompleteTasks));										//the incompleteTasks list with all the tasks in a list is sent as Json Object
 
@@ -460,6 +509,42 @@ import static play.libs.Json.toJson;
 	}
 	
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+
+	public static Result showAllOverdueTasks() throws ParseException	{
+		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();			//taking list of all existing tasks
+		List<TaskInfo> overdueTasks = new ArrayList<TaskInfo>();		//a new list to add each overdue task to
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");		//specifying the date format to be followed
+		Date date1 = new Date();	//a new Date object gives us the current system time
+		String enddate_string;	//string to take end date in
+		for(TaskInfo eachTask : Tasks){			//for each task in the list of tasks
+			enddate_string = eachTask.getEndDate();	//getting the end date of the task
+			Date date2 = dateFormat.parse(enddate_string);		//converting the end date string into required date format
+			if(date1.after(date2) && eachTask.getDone()==false)			//if currrent date is after the end date of tasks
+				overdueTasks.add(eachTask);		//add that task to list of overdue tasks
+		}
+		return ok(toJson(overdueTasks));		//return overdue tasks
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static Result showMyOverdueTasks() throws ParseException	{
+		List<TaskInfo> Tasks = new Model.Finder(String.class,TaskInfo.class).all();			//taking list of all existing tasks
+		List<TaskInfo> overdueTasks = new ArrayList<TaskInfo>();		//a new list to add each overdue task to
+		Person currentUser= (Person) new Model.Finder(String.class,Person.class).byId(session("connectedmail"));
+		String usermail = session("connectedmail");
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");		//specifying the date format to be followed
+		Date date1 = new Date();	//a new Date object gives us the current system time
+		String enddate_string;	//string to take end date in
+		for(TaskInfo eachTask : Tasks){			//for each task in the list of tasks
+			enddate_string = eachTask.getEndDate();		//getting the end date of the task
+			Date date2 = dateFormat.parse(enddate_string);		//converting the end date string into required date format
+			if(date1.after(date2) && eachTask.getEmailAssignedTo().equalsIgnoreCase(currentUser.getEmail())  && eachTask.getDone()==false)			//if currrent date is after the end date of tasks
+				overdueTasks.add(eachTask);		//add that task to list of overdue tasks
+				//the email to which the task is assigned is checked with the current session email
+				//if they are equal, the task is added to the list of the user's overdue tasks
+		}
+		return ok(toJson(overdueTasks));		//return overdue tasks
+	}
 	
 	@SuppressWarnings("unchecked")
 	
