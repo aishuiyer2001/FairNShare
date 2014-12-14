@@ -491,13 +491,10 @@ public class Application extends Controller {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		String startOfRecurrence= "2014-12-01";
 		String todayDate = session("fairdate");
-		Calendar startOfRec=Calendar.getInstance();
-		Calendar todayInstance=Calendar.getInstance();
 		
 		Date startDateOfRecurrence = dateFormat.parse(startOfRecurrence);
-		startOfRec.setTime(startDateOfRecurrence);
 		Date today = dateFormat.parse(todayDate);
-		todayInstance.setTime(today);
+
 		int differenceOfDays =(int) ((today.getTime()-startDateOfRecurrence.getTime()) / (24 * 60 * 60 * 1000));
 		Double pointsToComplete = pointsNeededForFairShare + (differenceOfDays/7)*currentUser.getDefaultScore();
 		
