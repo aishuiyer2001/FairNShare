@@ -5,10 +5,12 @@ $(document).ready(
 		 */
 
 		function() {       
-			$.get("/getPointsToComplete",function(data,status){
+			$.get("/getPointsToComplete").done(function(data,status){			
 				$("#toComplete").text(data.PointsToComplete);
 				$("#earned").text(data.EarnedPoints);
-			});    
+			}).fail(function(){
+				console.log('in error');
+				});    
 			
 			
 			$("#task-page").click(function(){
@@ -48,7 +50,7 @@ $(document).ready(
 					$('#task_recurring').html("<h2>My Recurring Tasks</h2><br><b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score");
 					jQuery.each(myRecurringTasks, function(i,task) {
 
-						$('#task_recurring').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.newPoints.toFixed(2)+' <form role="form" action="" method=""> <input type="submit" class="btn btn-success" id="mybutton" value="Done!"></input></form></li></td></tr>');
+						$('#task_recurring').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.newPoints+' <form role="form" action="" method=""> <input type="submit" class="btn btn-success" id="mybutton" value="Done!"></input></form></li></td></tr>');
 						$('#task_recurring').show();
 				});
 			});
@@ -90,7 +92,7 @@ $(document).ready(
 					$('#mytask_div').hide();
 					$('#myincompletetask_div').html("<h2>My Incomplete Tasks</h2><br><b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score");
 					jQuery.each(myincompletetasks, function(i,task) {
-						$('#myincompletetask_div').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.oldPoints.toFixed(2)+' <form role="form" action="/personUpdate/'+task.taskID+'" method="POST"> <input type="submit" class="btn btn-success" id="mybutton" value="Done!"></input></form></li></td></tr>');
+						$('#myincompletetask_div').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.oldPoints.toFixed(2)+' <form role="form" action="/personUpdate/'+task.taskID+'" method="GET"> <input type="submit" class="btn btn-success" id="mybutton" value="Done!"></input></form></li></td></tr>');
 						$('#myincompletetask_div').show();
 				});
 			});
@@ -175,6 +177,7 @@ $(document).ready(
 				$('#task_incomplete').hide();
 				$('#task_div').hide();
 				$('#mytask_overdue').hide();
+				$("#notification_div").show();
 				$.get("/getPointsToComplete",function(data,status){
 					$("#toComplete").text(data.PointsToComplete);
 					$("#earned").text(data.EarnedPoints);

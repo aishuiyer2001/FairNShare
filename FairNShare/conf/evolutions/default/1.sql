@@ -9,6 +9,7 @@ create table person (
   lname                     varchar(255),
   score                     double,
   dob                       varchar(255),
+  default_score             double,
   ph_no                     varchar(255),
   gender                    varchar(255),
   password                  varchar(255),

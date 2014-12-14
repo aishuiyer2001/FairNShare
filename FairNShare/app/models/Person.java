@@ -29,6 +29,8 @@ public class Person extends Model {
 	private String dob;
 
 
+	private double defaultScore;
+	
 	private String ph_no;
 	private Character gender;
 
@@ -40,7 +42,10 @@ public class Person extends Model {
 		this.dob=null;
 		this.gender=null;
 		this.ph_no=null;
+		this.setDefaultScore(15);
 	}
+	
+	
 
 	public String getEmail() {
 		return email;
@@ -107,5 +112,21 @@ public class Person extends Model {
 
 	public void setScore(double score) {
 		this.score = score;
+	}
+
+
+
+	/**
+	 * @return the defaultScore
+	 */
+	public double getDefaultScore() {
+		return defaultScore;
+	}
+
+	/**
+	 * @param defaultScore the defaultScore to set
+	 */
+	public void setDefaultScore(double defaultScore) {
+		this.defaultScore = defaultScore;
 	}
 }

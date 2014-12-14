@@ -29,7 +29,7 @@ GET     /enteredText/:data			controllers.Application.checkIfReusable(data)
 
 # on clicking the url of dashboard
 GET    /dashboard                  controllers.Application.redirectDashBoardURL()
-POST	/personUpdate/:taskID			controllers.Application.personUpdate(taskID)
+GET	/personUpdate/:taskID			controllers.Application.personUpdate(taskID)
 GET     /showMyRecurringTasks       controllers.Application.showMyRecurringTasks()
 
 # Map static resources from the /public folder to the /assets URL path
