@@ -18,6 +18,8 @@
 <script type='text/javascript' src='@routes.Assets.at("dashboard.js")'></script>
 <script type='text/javascript' src='@routes.Assets.at("radio.js")'></script>
 
+<link rel="stylesheet" type="text/css" href='@routes.Assets.at("autocomplete.css")'>
+
 @import helper._ 
 
 @main("Dashboard") {
@@ -164,6 +166,7 @@
 						<div class="col-xs-12 col-sm-6 col-md-6">
 							<div class="form-group">
 								<label for="name">Task Name:</label>
+
 								<input type="text" name="title" id="title" onKeyUp = "trackInputText()" 
 									class="form-control input-lg" placeholder="Title" tabindex="1"
 									required>
@@ -270,8 +273,10 @@
   							</div>
   						</div>
  					</div>
- 					<input type="hidden" id="toggleValue" name="toggleValue" value="1:">
-					<button type="submit" id="createTask"  class="btn btn-success">Create Task</button>
+
+					<input type="hidden" id="toggleValue" name="toggleValue" value="1:">
+ 					<button type="submit" id="createTask"  class="btn btn-success">Create Task</button>
+
 					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 				</form>
 			  </div>
@@ -294,15 +299,17 @@
 
 	// 1 - create task, 2- replace task
 	var selectedTaskTitle="";
-	
+
+
 	var toggleInt =1;
-	
-	
+
+
 	function trackInputText()
 	{
-		
+
 		var enteredText = document.getElementById("title").value;
-		
+
+
 		if(enteredText!="")
 		{
 			var suggestionsTitles=[];
@@ -315,8 +322,7 @@
 							   object : task
 							});
 						});
-						
-					
+
 					$("#title").autocomplete({ 
 						source: suggestionsTitles,
 						select : function(event,ui)
@@ -331,15 +337,16 @@
 							document.getElementById("toggleValue").value=toggleInt+":"+ui.item.object.taskID;
 							selectedTaskTitle=ui.item.label;
 						}
-					 
-					
+
+
+
 					});
-			
-				  
+
+
 				}).error(function(){
 					console.log("no suggestions")
 					});
-			
+
 		}
 		else if(toggleInt==2 && enteredText!=selectedTaskTitle)
 		{
@@ -353,8 +360,10 @@
 			document.getElementById("toggleValue").value=toggleInt+":";
 			selectedTaskTitle="";
 		}
-			
-		
+
+
+
 	}
 </script>
+
 }

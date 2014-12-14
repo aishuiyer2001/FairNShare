@@ -1,8 +1,6 @@
 package controllers;
-import views.html.*;
+import static play.libs.Json.toJson;
 
-import java.awt.Window;
-import java.awt.event.WindowEvent;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,31 +9,32 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import models.Person;
+import models.TaskInfo;
+import play.api.Logger;
 
-import javax.swing.JButton;
-
+import org.slf4j.LoggerFactory;
 import org.h2.engine.User;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 
-import ch.qos.logback.core.joran.action.ActionUtil.Scope;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.sun.java.swing.plaf.windows.WindowsBorders.DashedBorder;
 
-import models.Person;
-import models.TaskInfo;
-import play.*;
-import play.api.data.validation.ValidationError;
+
+
+
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.ebean.Model;
 import play.libs.Json;
-import play.mvc.*;
-import play.mvc.Http.Context;
-import play.mvc.Http.Session;
-import static play.libs.Json.toJson;
+import play.mvc.Controller;
+import play.mvc.Result;
+import sun.util.calendar.CalendarDate;
+import sun.util.calendar.CalendarUtils;
+import views.html.calendar;
+import views.html.index;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @SuppressWarnings("unused")
 public class Application extends Controller {
@@ -57,20 +56,37 @@ public class Application extends Controller {
 		if(user==null)
 			return redirect(routes.Application.index());
 		return ok(views.html.dashboard.render("Welcome " + user));
+		//logger.debug(arg0);
+		
 	}
 
 
 
 
 	public static Result changeCalendar() throws ParseException{
-		DynamicForm requestData = Form.form().bindFromRequest(); 
-		String date = requestData.get("calendar");
-		session("fairdate", date);
-		String datenew= session("fairdate");
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		Date newdate = dateFormat.parse(datenew); 
-		return ok(views.html.dashboard.render("WELCOME"));
-		//redirectDashBoardURL();
+		DynamicForm requestData = Form.form().bindFromRequest();
+        
+        String sdate = session("fairdate");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+       
+        /* If we want to check for system time than the earlier set time
+        Date sysTime = new Date();
+        String systemdate = (String) dateFormat.format(sysTime);
+        sysTime = dateFormat.parse(systemdate);
+        */
+       
+        Date sessiondate = dateFormat.parse(sdate);
+        String date = requestData.get("calendar");
+        Date newcalendardate = dateFormat.parse(date);
+        if(sessiondate.before(newcalendardate))
+        {
+               session("fairdate", date);
+               return ok(views.html.dashboard.render("WELCOME"));
+        }
+        else
+        {
+               return ok(views.html.calendar.render("Please enter a valid date"));
+        }
 	}
 	public static Result addPerson() {
 
@@ -110,10 +126,82 @@ public class Application extends Controller {
 
 		if(recurringType.equals("weekly"))
 			c.add(Calendar.DATE, 6);
+=======
+		return sdf.format(c.getTime());
+
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static Result createTask() throws Exception {
+
+		TaskInfo newTask = Form.form(TaskInfo.class).bindFromRequest().get();
+
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		DynamicForm requestData = Form.form().bindFromRequest();
+		System.out.println("toggle"+ requestData.get("toggleValue"));		// 1- new task, 2 - reusing a task
+		newTask.setCreatedBy(session("connectedmail"));
+		newTask.setDescription(requestData.get("description"));
+
+		Person existingPerson = (Person) new Model.Finder(String.class,Person.class).byId(requestData.get("emailAssignedTo"));
+		if(!requestData.get("emailAssignedTo").equals("") && existingPerson!=null)
+			newTask.setEmailAssignedTo(requestData.get("emailAssignedTo"));
+		else if(!requestData.get("emailAssignedTo").equals("") && existingPerson==null)
+			return ok(views.html.dashboard.render("Task could not be created. Email to assign does not exist in the database"));
+
+		newTask.setStartDate(requestData.get("startDate"));
+		int days=0;
+
+		String ending_in = requestData.get("enddays");
+		if(ending_in.equals("")){
+			days = 0;
+		}
+		else{
+			days = Integer.parseInt(ending_in);
+		}
+		
+		Date start_date = dateFormat.parse(newTask.getStartDate());  //get the starting date
+		Calendar c = Calendar.getInstance();
+		c.setTime(start_date);
+		String end=null;
+		if(days>0)		//if the number of days are specified
+		{
+			c.add(Calendar.DATE, days);		//add the number of days to the start date of the task
+			end = dateFormat.format(c.getTime());
+			newTask.setEndDate(end);
+			//set the added date as the end date for the task
+			
+			newTask.save();
+			
+		}  
+		else
+			newTask.setEndDate(requestData.get("endDate"));
+			newTask.save();
+		
+		newTask.setOldPoints(Double.parseDouble(requestData.get("newPoints")));
+		newTask.setNewPoints(Double.parseDouble(requestData.get("newPoints")));
+		newTask.setTitle(requestData.get("title"));
+		
+		if(!requestData.get("recurring_type").equals(" "))
+		{
+			//System.out.println("shitt");
+			newTask.setRecurring_status(true);
+			//if(newTask.getStartDate()!=null)
+				//newTask.setEndDate(getEndDate(newTask.getStartDate(), requestData.get("recurring_type")));
+		}
+		if(requestData.get("toggleValue").split(":")[0].equals("2"))		// reusable task	
+			TaskInfo.findTask.ref(Long.parseLong(requestData.get("toggleValue").split(":")[1])).delete();
+
+		List<TaskInfo> allTasks = new Model.Finder(String.class,TaskInfo.class).all();
+		boolean taskAlreadyExists = false;
+		for(TaskInfo task : allTasks)
+			if(task.getTitle().equalsIgnoreCase(newTask.getTitle()))
+				taskAlreadyExists=true;
+>>>>>>> 3357d501fdb77511c3a61c45bcca4c04c98dd8a0
 
 		else if(recurringType.equals("monthly"))
 			c.add(Calendar.DATE, 29);
 
+<<<<<<< HEAD
 		return sdf.format(c.getTime());
 	} */
 
@@ -219,7 +307,6 @@ public class Application extends Controller {
 		return ok(views.html.dashboard.render(""));
 	}
 
-
 	private static String getEndDate(String startDate, int days) throws ParseException
 	{
 		Calendar c = Calendar.getInstance();		
@@ -233,15 +320,34 @@ public class Application extends Controller {
 		return sdf.format(c.getTime());
 	}
 
+	
+	
+	public static Result checkIfReusable(String taskStart) throws ParseException
+	{
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		taskStart = "%"+taskStart+"%";
+		List<TaskInfo> suggestionsTemp =TaskInfo.findTask.where().ilike("title", taskStart).findList();
+		List<TaskInfo> suggestions = new ArrayList<TaskInfo>();
+		Date currentDate = new Date();
+		System.out.println("suggestions "+suggestionsTemp);
+		for(TaskInfo task : suggestionsTemp)
+		{
+			if(currentDate.after(dateFormat.parse(task.getEndDate())))	// deadline has not passed, hence currently assigned
+			{
+				System.out.println(" before task"+suggestions.size());	
+				suggestions.add(task);
+				System.out.println(" after task"+suggestions.size());				
+			}	
+		}
 
-
+			return ok(toJson(suggestions));
+	}
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Result showTasks() {												//method to show all tasks in the system
 		List<TaskInfo> tasks = new Model.Finder(String.class,TaskInfo.class).all(); //extracting all tasks from the database
 		return ok(toJson(tasks));  													//passing the tasks as a json object
 	}
-
-
 
 
 	public static Result showMyRecurringTasks(){
@@ -250,6 +356,7 @@ public class Application extends Controller {
 		for(TaskInfo eachTask : Tasks)  																//for each task in the list of all tasks,
 			if(eachTask.isRecurring_status() &&  eachTask.getEmailAssignedTo()!=null && eachTask.getEmailAssignedTo().equalsIgnoreCase(session("connectedmail")))			//if the status of the task is not done,
 				myRecurringTasks.add(eachTask);											    	//that task is added to the incompleteTasks list
+
 		return ok(toJson(myRecurringTasks));										//the incompleteTasks list with all the tasks in a list is sent as Json Object
 
 	}
@@ -307,6 +414,7 @@ public class Application extends Controller {
 			{
 				if(t.getEmailAssignedTo()!=null && usermail.contentEquals(t.getEmailAssignedTo()))
 				{
+					
 				}
 				else
 				{
@@ -383,12 +491,14 @@ public class Application extends Controller {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		String startOfRecurrence= "2014-12-01";
 		String todayDate = session("fairdate");
-
+		Calendar startOfRec=Calendar.getInstance();
+		Calendar todayInstance=Calendar.getInstance();
 		
 		Date startDateOfRecurrence = dateFormat.parse(startOfRecurrence);
+		startOfRec.setTime(startDateOfRecurrence);
 		Date today = dateFormat.parse(todayDate);
-		
-		int differenceOfDays =today.getDate()-startDateOfRecurrence.getDate();
+		todayInstance.setTime(today);
+		int differenceOfDays =(int) ((today.getTime()-startDateOfRecurrence.getTime()) / (24 * 60 * 60 * 1000));
 		Double pointsToComplete = pointsNeededForFairShare + (differenceOfDays/7)*currentUser.getDefaultScore();
 		
 		ObjectNode userPoints=Json.newObject();
@@ -490,26 +600,6 @@ public class Application extends Controller {
 
 
 
-	public static Result checkIfReusable(String taskStart) throws ParseException
-	{
-
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		taskStart = "%"+taskStart+"%";
-		List<TaskInfo> suggestionsTemp =TaskInfo.findTask.where()
-				.ilike("title", taskStart)
-				.findList();
-		List<TaskInfo> suggestions = new ArrayList<TaskInfo>();
-		Date currentDate = dateFormat.parse(session("fairdate"));
-			for(TaskInfo task : suggestionsTemp)
-		{
-			if(currentDate.after(dateFormat.parse(task.getEndDate())))	// deadline has not passed, hence currently assigned
-			{
-				suggestions.add(task);
-				}	
-		}
-
-		return ok(toJson(suggestions));
-	}
 
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -525,6 +615,7 @@ public class Application extends Controller {
 				incompleteTasks.add(eachTask);
 		}
 		return ok(toJson(incompleteTasks));										//the incompleteTasks list with all the tasks in a list is sent as Json Object
+
 
 	}
 

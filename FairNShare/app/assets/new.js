@@ -20,7 +20,6 @@ $(document).ready(
 					$('#userPoints').hide();
 					$("#notification_div").hide();
 					$('#dashboard_div').hide();
-					$('#task_reusable').hide();
 					$('#mytask_div').hide();
 					$('#myincompletetask_div').hide();
 					$('#alltask_overdue').hide();

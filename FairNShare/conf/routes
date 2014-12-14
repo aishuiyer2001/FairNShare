@@ -23,6 +23,7 @@ GET		/showMyOverdueTasks			controllers.Application.showMyOverdueTasks()
 POST    /taskUpdate/:taskID			controllers.Application.taskUpdate(taskID)
 GET     /showMyTasks				controllers.Application.showMyTasks()
 GET 	/showMyIncompleteTasks		controllers.Application.showMyIncompleteTasks()
+GET     /enteredText/:data			controllers.Application.checkIfReusable(data)
 #GET    /*name						controllers.Application.endSession(name)
 GET     /enteredText/:data			controllers.Application.checkIfReusable(data)
 
