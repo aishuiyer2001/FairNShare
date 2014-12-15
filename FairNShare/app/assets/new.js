@@ -5,14 +5,15 @@ $(document).ready(
 		 */
 
 		function() {       
-			$.get("/getPointsToComplete").done(function(data,status){			
+			$.get("/getPointsToComplete").done(function(data,status){	
+				$("#notification_div").show();
 				$("#toComplete").text(data.PointsToComplete);
 				$("#earned").text(data.EarnedPoints);
 			}).fail(function(){
 				console.log('in error');
 				});    
-			
-			
+
+
 			$("#task-page").click(function(){
 				$.get("/showTasks",function(tasks,status){
 					$('#friend_div').hide();
@@ -76,7 +77,7 @@ $(document).ready(
 				});
 			});
 			});
-			
+
 			$("#myincompletetask-page").click(function(){
 				$.get("/showMyIncompleteTasks",function(myincompletetasks,status){
 					$('#friend_div').hide();
@@ -119,8 +120,8 @@ $(document).ready(
 				});
 			});
 			});
-			
-			
+
+
 			/* displays the overdue tasks out of all incomplete tasks*/
 			$("#alloverdue-page").click(function(){
 				$.get("/showAllOverdueTasks",function(alloverdueTasks,status){
@@ -176,41 +177,16 @@ $(document).ready(
 				$('#task_incomplete').hide();
 				$('#task_div').hide();
 				$('#mytask_overdue').hide();
-				$("#notification_div").show();
+				$("#notification_div").html("<h2 id='notification_div' style='top:70px;'>Notifications</h2>");
 				$.get("/getPointsToComplete",function(data,status){
 					$("#toComplete").text(data.PointsToComplete);
 					$("#earned").text(data.EarnedPoints);
-					$("#userPoints").prepend("<h2 id='notification_div' style='top:70px;'>Notifications</h2>");
 					$("#userPoints").show();
 
 				});
 			});   
 
-			/*JS for User Story 3.2
-			 
-			 */	
-			$("#resuabletask-page").click(function(){
-				$.get("/showReUsableTasks",function(reUsableTasks,status){
-					$('#friend_div').hide();
-					$('#mytask_div').hide();
-					$('#task_recurring').hide();
-					$("#notification_div").hide();
-					$('#userPoints').hide();
-					$('#dashboard_div').hide();
-					$('#task_incomplete').hide();
-					$('#task_div').hide();
-					$('#task_incomplete').hide();
-					$('#task_div').hide();
-					$('#mytask_overdue').hide();
-					$('#task_reusable').prepend("<h2>Reusable Tasks</h2>");
-					$('#task_reusable').append("<b>Task Name"+" ----- "+"Assigned to"+" ------ "+"Assigned by"+" -------- "+"Start Date"+" ---"+"End Date"+" ---"+"Score");
-					jQuery.each(reUsableTasks, function(i,task) {
-						$('#task_reusable').append('<tr><td><li class="list-group-item">'+task.title+' ---- '+task.emailAssignedTo+' ---- '+task.createdBy+'---- '+task.startDate+' ---- '+task.endDate+' ---- '+task.newPoints.toFixed(2)+' <form id="ReuseTaskIDForm" role="form" action="/reusetaskUpdate/'+task.taskID+'" method="POST"> <input type="submit" class="btn btn-success" id="mybutton" value="Reuse"></input></form></li></td></tr>');
-						$('#task_reusable').show();
-				});
-			});
-			});
-
+			
 			/* displays the points earned by user and points needed by him to do fair share of work,
 			 * when the user clicks the dashboard tab on the left menu bar
 			 */
