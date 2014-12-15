@@ -6,8 +6,8 @@
 GET     /                         controllers.Application.index()
 POST	/person						controllers.Application.addPerson()
 
-POST	/calendar					controllers.Application.changeCalendar()
-
+GET	/calendar					controllers.Application.calendar()
+POST /changeCalendar							controllers.Application.changeCalendar()
 POST    /dashboard					controllers.Application.checkPerson()
 GET		/getPointsToComplete		controllers.Application.getPointsToComplete()
 GET    /showFriends			        controllers.Application.showFriends()

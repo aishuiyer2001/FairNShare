@@ -60,7 +60,10 @@ public class Application extends Controller {
 		
 	}
 
-
+	public static Result calendar()
+	{
+		return ok(calendar.render("CALENDAR"));
+	}
 
 
 	public static Result changeCalendar() throws ParseException{
