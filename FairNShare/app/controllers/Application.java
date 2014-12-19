@@ -228,7 +228,7 @@ import static play.libs.Json.toJson;
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	
 	public static Result taskUpdate(String taskID) {											//method to update task which is incomplete, to assign it to the user himself
-		//TaskIDRetrieval currentTask = Form.form(TaskIDRetrieval.class).bindFromRequest().get();		
+				
 		TaskInfo existingTask = (TaskInfo) new Model.Finder(String.class,TaskInfo.class).byId(Integer.parseInt(taskID));
 		
 		System.out.println("taskID"+taskID);
